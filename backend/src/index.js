@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import pool from "./config/db.js";
+import corsMiddleware from './middleware/cors.middleware.js';
 
 import categoriaRoutes from "./routes/categoria.route.js";
 import productoRoutes from "./routes/producto.route.js";
@@ -13,7 +14,7 @@ import authRoute from './routes/auth.route.js';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(corsMiddleware);
 app.use(express.json());
 
 // health
