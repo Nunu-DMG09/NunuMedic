@@ -14,7 +14,7 @@
   --nunumed-800: #0a2f80;
   --nunumed-900: #141a29;
 
-  --bg: #ffffff;
+  --bg: #141a29;
   --surface: #ffffff;
   --muted: #6b7280;
 
@@ -32,7 +32,7 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #ffffff;
+  background-color: #141a29;
   color: #0f172a;
   line-height: 1.4;
   -webkit-font-synthesis: none;
@@ -174,7 +174,7 @@ a:focus-visible, button:focus-visible, .input:focus { box-shadow: 0 6px 18px rgb
 /* Dark mode (optional) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #ffffff;
+    --bg: #141a29;
     --surface: #071127;
     --muted: #94a3b8;
   }
@@ -182,6 +182,49 @@ a:focus-visible, button:focus-visible, .input:focus { box-shadow: 0 6px 18px rgb
   .card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.04); box-shadow: none; }
   .input { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); color: #e6eef8; }
   .btn-outline { color: var(--nunumed-200); border-color: rgba(77,168,255,0.12); }
+}
+
+/* PARA EL MODAL */
+
+/* Modal: overlay, backdrop blur y carta centrada */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+/* semitransparente + blur (soporta navegadores que implementen backdrop-filter) */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2,6,23,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: opacity .18s ease;
+}
+
+/* carta del modal sobre el backdrop */
+.modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(920px, 96%);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(2,6,23,0.5);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,255,0.98));
+  transition: transform .18s ease, opacity .18s ease;
+  transform: translateY(0);
+}
+
+/* pequeño ajuste para móviles */
+@media (max-width: 480px) {
+  .modal-card { padding: 12px; border-radius: 8px; }
 }
 
 /* ...existing code... */
