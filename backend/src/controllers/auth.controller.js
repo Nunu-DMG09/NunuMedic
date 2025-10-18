@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 
 export async function login(req, res) {
     try {
+        console.log('[LOGIN] origin=', req.headers.origin, 'ip=', req.ip, 'method=', req.method, 'body=', req.body);
         const { usuario, clave } = req.body || {};
         if (!usuario || !clave) return res.status(400).json({ error: 'usuario y clave son requeridos' });
 
