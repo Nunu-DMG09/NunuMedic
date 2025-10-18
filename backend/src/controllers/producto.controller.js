@@ -1,5 +1,44 @@
 import * as Producto from '../models/producto.model.js';
 
+// Helpers
+function toNumberOrNull(val) {
+    if (val === undefined || val === null || val === '') return null;
+    const n = Number(val);
+    return Number.isFinite(n) ? n : null;
+}
+
+function normalizeFecha(fecha) {
+    if (!fecha) return null; // permitir null
+    const s = String(fecha).trim();
+    // Formato ISO YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        // Validar fecha real
+        const [y, m, d] = s.split('-').map(Number);
+        const dt = new Date(Date.UTC(y, m - 1, d));
+        if (dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d) return s;
+        return null;
+    }
+    // Formato DD-MM-YYYY
+    if (/^\d{2}-\d{2}-\d{4}$/.test(s)) {
+        const [dd, mm, yyyy] = s.split('-').map(Number);
+        const dt = new Date(Date.UTC(yyyy, mm - 1, dd));
+        if (dt.getUTCFullYear() === yyyy && dt.getUTCMonth() === mm - 1 && dt.getUTCDate() === dd) {
+            return `${yyyy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+        }
+        return null;
+    }
+    // Formato DD/MM/YYYY
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+        const [dd, mm, yyyy] = s.split('/').map(Number);
+        const dt = new Date(Date.UTC(yyyy, mm - 1, dd));
+        if (dt.getUTCFullYear() === yyyy && dt.getUTCMonth() === mm - 1 && dt.getUTCDate() === dd) {
+            return `${yyyy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+        }
+        return null;
+    }
+    return null; // formato desconocido
+}
+
 export async function getAllProductos (req, res){
     try{
         const rows = await Producto.findAll();
@@ -25,13 +64,61 @@ export async function getProductoById(req, res) {
 
 export async function createProducto(req, res) {
     try {
-        const { nombre_producto } = req.body;
-        if (!nombre_producto) return res.status(400).json({ error: 'nombre_producto es requerido' });
+        const {
+            nombre_producto,
+            descripcion,
+            id_categoria,
+            precio_compra,
+            precio_venta,
+            stock,
+            stock_minimo,
+            fecha_vencimiento,
+        } = req.body || {};
 
-        const id = await Producto.createProducto(req.body);
+        if (!nombre_producto || String(nombre_producto).trim() === '') {
+            return res.status(400).json({ error: 'nombre_producto es requerido' });
+        }
+
+        // Coerciones y validaciones básicas
+        const idCategoriaNum = toNumberOrNull(id_categoria);
+        const precioCompraNum = toNumberOrNull(precio_compra);
+        const precioVentaNum = toNumberOrNull(precio_venta);
+        const stockNum = toNumberOrNull(stock ?? 0);
+        const stockMinNum = toNumberOrNull(stock_minimo ?? 5);
+        const fechaISO = normalizeFecha(fecha_vencimiento);
+
+        if (precioCompraNum === null || precioVentaNum === null) {
+            return res.status(400).json({ error: 'precio_compra y precio_venta deben ser numéricos' });
+        }
+        if (stockNum === null || stockMinNum === null) {
+            return res.status(400).json({ error: 'stock y stock_minimo deben ser numéricos' });
+        }
+        if (fecha_vencimiento !== undefined && fecha_vencimiento !== null && fechaISO === null) {
+            return res.status(400).json({ error: 'fecha_vencimiento inválida. Use YYYY-MM-DD o DD-MM-YYYY' });
+        }
+
+        const payload = {
+            nombre_producto: String(nombre_producto).trim(),
+            descripcion: descripcion ?? null,
+            id_categoria: idCategoriaNum, // puede ser null si no envían categoría
+            precio_compra: precioCompraNum,
+            precio_venta: precioVentaNum,
+            stock: stockNum,
+            stock_minimo: stockMinNum,
+            fecha_vencimiento: fechaISO, // YYYY-MM-DD o null
+        };
+
+        const id = await Producto.createProducto(payload);
         return res.status(201).json({ message: 'Producto creado', id_producto: id });
     } catch (err) {
         console.error(err);
+        // Errores comunes de MySQL/MariaDB
+        if (err && (err.code === 'ER_NO_REFERENCED_ROW' || err.code === 'ER_NO_REFERENCED_ROW_2' || /foreign key constraint/i.test(err.sqlMessage || err.message))) {
+            return res.status(400).json({ error: 'La categoría especificada no existe (id_categoria inválido)' });
+        }
+        if (err && (err.code === 'ER_TRUNCATED_WRONG_VALUE' || err.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD' || /Incorrect (date|datetime) value/i.test(err.sqlMessage || err.message))) {
+            return res.status(400).json({ error: 'Fecha inválida. Use YYYY-MM-DD o DD-MM-YYYY' });
+        }
         return res.status(500).json({ error: 'Error al crear producto' });
     }
 }
