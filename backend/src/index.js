@@ -9,7 +9,7 @@ import ventaRoutes from "./routes/venta.route.js";
 import movimientoRoutes from "./routes/movimiento_stock.route.js";
 import clienteRoutes from "./routes/cliente.route.js";
 import usuarioRoutes from "./routes/usuario.route.js";
-
+import authRoute from './routes/auth.route.js';
 dotenv.config();
 
 const app = express();
@@ -28,6 +28,7 @@ app.use("/api/ventas", ventaRoutes);
 app.use("/api/movimientos", movimientoRoutes);
 app.use("/api/clientes", clienteRoutes);
 app.use("/api/usuarios", usuarioRoutes);
+app.use('/api/auth', authRoute);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
