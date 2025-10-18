@@ -1,13 +1,39 @@
 import pool from '../config/db.js';
 
 export async function findAll() {
-  const [rows] = await pool.query('SELECT * FROM producto ORDER BY nombre_producto');
-  return rows;
+  const [rows] = await pool.query(
+    `SELECT p.*, c.nombre_categoria AS categoria_nombre
+     FROM producto p
+     LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+     ORDER BY p.id_producto DESC`
+  );
+
+  // añadir objeto categoria para cada fila
+  return rows.map(r => ({
+    ...r,
+    categoria_nombre: r.categoria_nombre ?? null,
+    categoria: r.id_categoria != null
+      ? { id_categoria: r.id_categoria, nombre: r.categoria_nombre ?? null }
+      : null
+  }));
 }
 
 export async function findById(id) {
-  const [rows] = await pool.query('SELECT * FROM producto WHERE id_producto = ?', [id]);
-  return rows[0];
+  const [rows] = await pool.query(
+    `SELECT p.*, c.nombre_categoria AS categoria_nombre
+     FROM producto p
+     LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+     WHERE p.id_producto = ?`,
+    [id]
+  );
+  const row = rows[0];
+  if (!row) return null;
+
+  return {
+    ...row,
+    categoria_nombre: row.categoria_nombre ?? null,
+    categoria: row.id_categoria != null ? { id_categoria: row.id_categoria, nombre: row.categoria_nombre ?? null } : null
+  };
 }
 
 export async function createProducto(data) {
