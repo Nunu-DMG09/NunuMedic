@@ -1,4 +1,5 @@
 import * as Producto from '../models/producto.model.js';
+import nodemailer from 'nodemailer';
 
 // Helpers
 function toNumberOrNull(val) {
@@ -149,5 +150,73 @@ export async function deleteProducto(req, res) {
         console.error(err);
         return res.status(500).json({ error: 'Error al eliminar producto' });
     }
+}
+
+export async function notifyStockMinimum(req, res) {
+  try {
+    const id_producto = req.body?.id_producto ?? (req.query?.id_producto ? Number(req.query.id_producto) : undefined);
+    if (!id_producto) return res.status(400).json({ error: 'id_producto required' });
+
+    // usar el modelo en vez de usar pool directamente
+    const product = await Producto.findById(Number(id_producto));
+    if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
+
+    // SMTP config (soporta SMTP_PASSWORD o SMTP_PASS)
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = Number(process.env.SMTP_PORT || 587);
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASSWORD ?? process.env.SMTP_PASS;
+    const smtpSecureEnv = (process.env.SMTP_SECURE === 'true');
+    const secure = smtpSecureEnv || smtpPort === 465;
+
+    if (!smtpHost) {
+      console.warn('SMTP_HOST no configurado - saltando envío de correo');
+      return res.json({ ok: true, warned: false, reason: 'no-smtp-host' });
+    }
+
+    const transport = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure,
+      auth: smtpUser ? { user: smtpUser, pass: smtpPass } : undefined,
+      tls: { rejectUnauthorized: false }
+    });
+
+    // verificar conexión SMTP y reportar error claro
+    try {
+      await transport.verify();
+    } catch (verifyErr) {
+      console.error('SMTP verify failed', verifyErr);
+      return res.status(500).json({ error: 'SMTP verify failed', details: verifyErr.message ?? String(verifyErr) });
+    }
+
+    const to = process.env.ALERT_EMAIL_TO;
+    if (!to) {
+      console.warn('ALERT_EMAIL_TO not set - skipping email send');
+      return res.json({ ok: true, warned: false, reason: 'no-alert-email' });
+    }
+
+    const subject = `Alerta: stock mínimo alcanzado - ${product.nombre_producto}`;
+    const html = `
+      <p>El producto <strong>${product.nombre_producto}</strong> (ID ${product.id_producto}) ha alcanzado el stock mínimo.</p>
+      <ul>
+        <li>Categoría: ${product.categoria_nombre ?? product.categoria?.nombre ?? '—'}</li>
+        <li>Stock actual: ${product.stock}</li>
+        <li>Stock mínimo: ${product.stock_minimo}</li>
+      </ul>
+    `;
+
+    await transport.sendMail({
+      from: process.env.SMTP_FROM || smtpUser,
+      to,
+      subject,
+      html
+    });
+
+    return res.json({ ok: true, warned: true });
+  } catch (err) {
+    console.error('notifyStockMinimum error', err);
+    return res.status(500).json({ error: 'Error sending notification', details: err.message ?? String(err) });
+  }
 }
 
