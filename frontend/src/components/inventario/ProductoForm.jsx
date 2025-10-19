@@ -24,6 +24,7 @@ export default function ProductoForm({ product, onCreated,onUpdated, onClose }) 
     stock: '',
     stock_minimo: '',
     fecha_vencimiento: '',
+    estado: '', // <-- nuevo campo estado
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -67,6 +68,7 @@ export default function ProductoForm({ product, onCreated,onUpdated, onClose }) 
         stock: product.stock ?? '',
         stock_minimo: product.stock_minimo ?? '',
         fecha_vencimiento: product.fecha_vencimiento ? fmtFecha(product.fecha_vencimiento) : '',
+        estado: product.estado ?? '', // cargar estado si existe
       });
       setError(null);
     } else {
@@ -80,7 +82,7 @@ export default function ProductoForm({ product, onCreated,onUpdated, onClose }) 
         stock: '',
         stock_minimo: '',
         fecha_vencimiento: '',
-    
+        estado: '',
       });
       setError(null);
     }
@@ -103,7 +105,7 @@ export default function ProductoForm({ product, onCreated,onUpdated, onClose }) 
         stock: form.stock ? Number(form.stock) : 0,
         stock_minimo: form.stock_minimo ? Number(form.stock_minimo) : 5,
         fecha_vencimiento: fmtFecha(form.fecha_vencimiento),
-        
+        estado: form.estado || null, // enviar estado
       };
 
 
@@ -181,6 +183,16 @@ export default function ProductoForm({ product, onCreated,onUpdated, onClose }) 
         <div>
           <label className="small-muted">Stock mínimo</label>
           <input value={form.stock_minimo} onChange={e => update('stock_minimo', e.target.value)} className="input" type="number" />
+        </div>
+
+        <div>
+          <label className="small-muted">Estado</label>
+          <select value={form.estado} onChange={e => update('estado', e.target.value)} className="input">
+            <option value="" className="bg-slate-800 text-slate-100">— Seleccionar —</option>
+            <option value="disponible" className="bg-slate-800 text-slate-100">Disponible</option>
+            <option value="agotado" className="bg-slate-800 text-slate-100">Agotado</option>
+            <option value="vencimiento" className="bg-slate-800 text-slate-100">A punto de vencer</option>
+          </select>
         </div>
 
         <div>
