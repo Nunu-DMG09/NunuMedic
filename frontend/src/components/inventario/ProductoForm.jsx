@@ -14,7 +14,7 @@ function fmtFecha(input) {
   return input;
 }
 
-export default function ProductoForm({ onCreated, onClose }) {
+export default function ProductoForm({ product, onCreated,onUpdated, onClose }) {
   const [form, setForm] = useState({
     nombre_producto: '',
     descripcion: '',
@@ -55,26 +55,22 @@ export default function ProductoForm({ onCreated, onClose }) {
     return () => { mounted = false; };
   }, []);
 
-  function update(k, v) { setForm(prev => ({ ...prev, [k]: v })); }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      const payload = {
-        ...form,
-        id_categoria: form.id_categoria ? Number(form.id_categoria) : null,
-        precio_compra: form.precio_compra ? Number(form.precio_compra) : null,
-        precio_venta: form.precio_venta ? Number(form.precio_venta) : null,
-        stock: form.stock ? Number(form.stock) : 0,
-        stock_minimo: form.stock_minimo ? Number(form.stock_minimo) : 5,
-        fecha_vencimiento: fmtFecha(form.fecha_vencimiento),
-      };
-      const { data } = await api.post('/api/productos/create', payload);
-      if (onCreated) onCreated(data);
-      if (onClose) onClose();
-      // reset
+  useEffect(() => {
+    if (product) {
+      setForm({
+        nombre_producto: product.nombre_producto ?? '',
+        descripcion: product.descripcion ?? '',
+        id_categoria: product.id_categoria ?? product.categoria?.id_categoria ?? '',
+        precio_compra: product.precio_compra ?? '',
+        precio_venta: product.precio_venta ?? '',
+        stock: product.stock ?? '',
+        stock_minimo: product.stock_minimo ?? '',
+        fecha_vencimiento: product.fecha_vencimiento ? fmtFecha(product.fecha_vencimiento) : '',
+      });
+      setError(null);
+    } else {
+      // reset for create
       setForm({
         nombre_producto: '',
         descripcion: '',
@@ -84,9 +80,47 @@ export default function ProductoForm({ onCreated, onClose }) {
         stock: '',
         stock_minimo: '',
         fecha_vencimiento: '',
+    
       });
+      setError(null);
+    }
+  }, [product]);
+
+  function update(k, v) { setForm(prev => ({ ...prev, [k]: v })); }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const payload = {
+        ...form,
+        nombre_producto: String(form.nombre_producto).trim(),
+        descripcion: form.descripcion || null,
+        id_categoria: form.id_categoria ? Number(form.id_categoria) : null,
+        precio_compra: form.precio_compra ? Number(form.precio_compra) : null,
+        precio_venta: form.precio_venta ? Number(form.precio_venta) : null,
+        stock: form.stock ? Number(form.stock) : 0,
+        stock_minimo: form.stock_minimo ? Number(form.stock_minimo) : 5,
+        fecha_vencimiento: fmtFecha(form.fecha_vencimiento),
+        
+      };
+
+
+      if (product && product.id_producto) {
+        // editar
+        await api.put(`/api/productos/${product.id_producto}`, payload);
+        onUpdated?.();
+      } else {
+        // crear
+        const res = await api.post('/api/productos/create', payload);
+        onCreated?.(res.data);
+      }
+
+      onClose?.();
     } catch (err) {
-      setError(err.response?.data?.error || 'Error creando producto');
+      console.error(err);
+      setError(err.response?.data?.error || 'Error guardando producto');
     } finally {
       setLoading(false);
     }
@@ -163,9 +197,24 @@ export default function ProductoForm({ onCreated, onClose }) {
 
       {error && <div style={{ color: 'red', marginTop: 10 }}>{error}</div>}
 
-      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-        <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Guardando...' : 'Crear'}</button>
-        {onClose && <button type="button" className="btn btn-outline" onClick={onClose}>Cancelar</button>}
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={loading}
+          className="inline-flex items-center justify-center rounded-md bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
+        >
+          {loading ? 'Guardando…' : (product ? 'Actualizar' : 'Crear')}
+        </button>
+
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center justify-center rounded-md border border-slate-700 text-slate-200 px-4 py-2 text-sm hover:bg-slate-800"
+          >
+            Cancelar
+          </button>
+        )}
       </div>
     </form>
   );
