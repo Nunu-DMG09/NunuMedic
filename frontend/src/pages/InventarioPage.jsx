@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProductoForm from '../components/inventario/ProductoForm';
 import Modal from '../components/inventario/Modal';
 import api from '../services/api';
@@ -10,12 +10,35 @@ export default function InventarioPage() {
   const [showModal, setShowModal] = useState(false);
   const [categoriasMap, setCategoriasMap] = useState({});
   const [editProduct, setEditProduct] = useState(null);
+  const notifiedRef = useRef(new Set());
 
   useEffect(() => {
     fetchCategorias();
     fetchProductos();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
+
+  // notify backend once per product when stock <= stock_minimo
+  useEffect(() => {
+    if (!productos || productos.length === 0) return;
+    async function notifyLow() {
+      for (const p of productos) {
+        const stockNum = Number(p.stock ?? 0);
+        const minNum = Number(p.stock_minimo ?? 0);
+        const low = !isNaN(minNum) && stockNum <= minNum;
+        if (low && p.id_producto && !notifiedRef.current.has(p.id_producto)) {
+          try {
+            await api.post('/api/productos/notificacion', { id_producto: p.id_producto });
+            notifiedRef.current.add(p.id_producto);
+          } catch (err) {
+            console.error('Error notifying stock minimum for', p.id_producto, err);
+        
+          }
+        }
+      }
+    }
+    notifyLow();
+  }, [productos]);
 
   async function fetchCategorias() {
     try {
@@ -173,7 +196,8 @@ export default function InventarioPage() {
                       style={{
                         padding: '6px 8px',
                         borderRadius: 6,
-                        ...(low ? { border: '1.5px solid rgba(239,68,68,0.95)', background: 'rgba(255,243,244,0.03)' } : {})
+                        color: low ? 'rgb(239,68,68)' : undefined,
+                        fontWeight: low ? 700 : undefined
                       }}
                       title={low ? 'Stock en o por debajo del mínimo' : undefined}
                     >
