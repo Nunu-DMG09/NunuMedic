@@ -9,6 +9,7 @@ export default function InventarioPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [categoriasMap, setCategoriasMap] = useState({});
+  const [editProduct, setEditProduct] = useState(null);
 
   useEffect(() => {
     fetchCategorias();
@@ -71,6 +72,23 @@ export default function InventarioPage() {
     setShowModal(false);
   }
 
+  function handleUpdated() {
+    setRefreshKey(k => k + 1);
+    setEditProduct(null);
+  }
+
+  async function handleDelete(id) {
+    const ok = window.confirm('¿Eliminar producto? Esta acción no se puede deshacer.');
+    if (!ok) return;
+    try {
+      await api.delete(`/api/productos/${id}`);
+      setRefreshKey(k => k + 1);
+    } catch (err) {
+      console.error('Error eliminando producto', err);
+      alert(err.response?.data?.error || 'Error eliminando producto');
+    }
+  }
+
   return (
     <div className="container" style={{ paddingTop: 24 }}>
       <div className="card" style={{ padding: 16 }}>
@@ -92,8 +110,14 @@ export default function InventarioPage() {
           </Modal>
         )}
 
+        {editProduct && (
+          <Modal title="Editar producto" onClose={() => setEditProduct(null)}>
+            <ProductoForm product={editProduct} onUpdated={handleUpdated} onClose={() => setEditProduct(null)} />
+          </Modal>
+        )}
+
         <div style={{ overflowX: 'auto' }}>
-          <table className="table" style={{ minWidth: 800 }}>
+          <table className="table" style={{ minWidth: 900 }}>
             <thead>
               <tr>
                 <th style={{ width: 60 }}>#</th>
@@ -101,6 +125,7 @@ export default function InventarioPage() {
                 <th>Categoria</th>
                 <th style={{ width: 120 }}>Precio</th>
                 <th style={{ width: 90 }}>Stock</th>
+                <th style={{ width: 110 }}>Stock mínimo</th>
                 <th style={{ width: 140 }}>Vencimiento</th>
                 <th style={{ width: 120 }}>Estado</th>
                 <th style={{ width: 130 }}>Acciones</th>
@@ -109,48 +134,69 @@ export default function InventarioPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: 20, textAlign: 'center' }}>Cargando...</td>
+                  <td colSpan={9} style={{ padding: 20, textAlign: 'center' }}>Cargando...</td>
                 </tr>
               ) : productos.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: 20, textAlign: 'center' }}>No hay productos</td>
+                  <td colSpan={9} style={{ padding: 20, textAlign: 'center' }}>No hay productos</td>
                 </tr>
-              ) : productos.map(p => (
-                <tr key={p.id_producto}>
-                  <td>{p.id_producto}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>{p.nombre_producto}</div>
-                        {p.descripcion && <div className="small-muted" style={{ marginTop: 4 }}>{p.descripcion}</div>}
+              ) : productos.map(p => {
+                const stockNum = Number(p.stock ?? 0);
+                const minNum = Number(p.stock_minimo ?? 0);
+                const low = !isNaN(minNum) && stockNum <= minNum;
+                return (
+                  <tr key={p.id_producto}>
+                    <td>{p.id_producto}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontWeight: 600 }}>{p.nombre_producto}</div>
+                          {p.descripcion && <div className="small-muted" style={{ marginTop: 4 }}>{p.descripcion}</div>}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    {p.id_categoria ? (
-                      p.categoria?.nombre
-                      ?? p.categoria_nombre
-                      ?? categoriasMap[p.id_categoria]
-                      ?? categoriasMap[String(p.id_categoria)]
-                      ?? p.id_categoria
-                    ) : (
-                      <span className="small-muted">Sin categoría</span>
-                    )}
-                  </td>
-                  <td>{Number(p.precio_venta || 0).toFixed(2)}</td>
-                  <td>{p.stock}</td>
-                  <td>{p.fecha_vencimiento ? new Date(p.fecha_vencimiento).toLocaleDateString() : <span className="small-muted">—</span>}</td>
-                  <td>
-                    <span className="badge" style={{ background: p.estado === 'agotado' ? '#ffe6e6' : p.estado === 'vencimiento' ? '#fff4e5' : undefined }}>
-                      {p.estado}
-                    </span>
-                  </td>
-                  <td>
-                    <button className="btn btn-outline" style={{ marginRight: 8 }}>Editar</button>
-                    <button className="btn btn-primary">Eliminar</button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+                      {p.id_categoria ? (
+                        p.categoria?.nombre
+                        ?? p.categoria_nombre
+                        ?? categoriasMap[p.id_categoria]
+                        ?? categoriasMap[String(p.id_categoria)]
+                        ?? p.id_categoria
+                      ) : (
+                        <span className="small-muted">Sin categoría</span>
+                      )}
+                    </td>
+
+                    <td>{Number(p.precio_venta || 0).toFixed(2)}</td>
+
+                    <td
+                      style={{
+                        padding: '6px 8px',
+                        borderRadius: 6,
+                        ...(low ? { border: '1.5px solid rgba(239,68,68,0.95)', background: 'rgba(255,243,244,0.03)' } : {})
+                      }}
+                      title={low ? 'Stock en o por debajo del mínimo' : undefined}
+                    >
+                      {stockNum}
+                    </td>
+
+                    <td style={{ padding: '6px 8px' }}>{minNum}</td>
+
+                    <td>{p.fecha_vencimiento ? new Date(p.fecha_vencimiento).toLocaleDateString() : <span className="small-muted">—</span>}</td>
+
+                    <td>
+                      <span className="badge" style={{ background: p.estado === 'agotado' ? '#ffe6e6' : p.estado === 'vencimiento' ? '#fff4e5' : undefined }}>
+                        {p.estado}
+                      </span>
+                    </td>
+
+                    <td>
+                      <button className="btn btn-outline" style={{ marginRight: 8 }} onClick={() => setEditProduct(p)}>Editar</button>
+                      <button className="btn btn-danger" onClick={() => handleDelete(p.id_producto)}>Eliminar</button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
