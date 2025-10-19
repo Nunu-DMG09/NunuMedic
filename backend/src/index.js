@@ -16,6 +16,7 @@ dotenv.config();
 const app = express();
 app.use(corsMiddleware);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // health
 app.get("/", (req, res) => {
