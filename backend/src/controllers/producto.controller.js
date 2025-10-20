@@ -125,17 +125,57 @@ export async function createProducto(req, res) {
 }
 
 export async function updateProducto(req, res) {
-    try {
-        const id = parseInt(req.params.id, 10);
-        if (!id) return res.status(400).json({ error: 'ID inválido' });
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (!id) return res.status(400).json({ error: 'ID inválido' });
 
-        const affected = await Producto.updateProducto(id, req.body);
-        if (!affected) return res.status(404).json({ error: 'Producto no encontrado o sin cambios' });
-        return res.status(200).json({ message: 'Producto actualizado' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Error al actualizar producto' });
+    // campos permitidos para actualizar
+    const allowed = ['nombre_producto', 'descripcion', 'id_categoria', 'precio_compra', 'precio_venta', 'stock', 'stock_minimo', 'fecha_vencimiento', 'estado'];
+    const body = req.body || {};
+
+    // Construir payload solo con campos permitidos y normalizar valores
+    const payload = {};
+    for (const key of allowed) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        const val = body[key];
+        if (key === 'id_categoria') {
+          payload.id_categoria = val === null || val === '' ? null : toNumberOrNull(val);
+        } else if (['precio_compra', 'precio_venta'].includes(key)) {
+          payload[key] = toNumberOrNull(val);
+        } else if (['stock', 'stock_minimo'].includes(key)) {
+          payload[key] = toNumberOrNull(val);
+        } else if (key === 'fecha_vencimiento') {
+          const fechaISO = normalizeFecha(val);
+          if (val !== undefined && val !== null && String(val).trim() !== '' && fechaISO === null) {
+            return res.status(400).json({ error: 'fecha_vencimiento inválida. Use YYYY-MM-DD o DD-MM-YYYY' });
+          }
+          payload.fecha_vencimiento = fechaISO;
+        } else {
+          // nombre_producto, descripcion, estado (permite null / string)
+          payload[key] = val === '' ? null : val;
+        }
+      }
     }
+
+    if (Object.keys(payload).length === 0) {
+      return res.status(400).json({ error: 'No hay campos para actualizar' });
+    }
+
+    const affected = await Producto.updateProducto(id, payload);
+    if (!affected) return res.status(404).json({ error: 'Producto no encontrado o sin cambios' });
+    return res.status(200).json({ message: 'Producto actualizado' });
+  } catch (err) {
+    console.error('updateProducto error', err);
+    // errores comunes y respuestas más claras
+    const msg = err && (err.sqlMessage || err.message) ? String(err.sqlMessage || err.message) : 'Error al actualizar producto';
+    if (/foreign key constraint/i.test(msg) || err.code === 'ER_NO_REFERENCED_ROW' || err.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(400).json({ error: 'id_categoria inválido (categoría no existe)' });
+    }
+    if (/Incorrect (date|datetime) value/i.test(msg) || err.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD') {
+      return res.status(400).json({ error: 'Fecha inválida. Use YYYY-MM-DD o DD-MM-YYYY' });
+    }
+    return res.status(500).json({ error: 'Error al actualizar producto' });
+  }
 }
 
 export async function deleteProducto(req, res) {
