@@ -40,7 +40,7 @@ export default function VentasForm() {
 
   async function fetchClientes() {
     try {
-      const res = await api.get('/api/clientes/listar', { validateStatus: false });
+      const res = await api.get('/api/clientes', { validateStatus: false });
       const data = res.data;
       let items = Array.isArray(data) ? data : (data?.clientes ?? data?.data ?? data?.rows) ?? [];
       setClients(Array.isArray(items) ? items : []);
