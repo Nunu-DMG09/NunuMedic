@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import MainLayout from './layout/MainLayout';
 import LoginPage from './pages/LoginPage';
 import InventarioPage from './pages/InventarioPage';
+import VentasPage from './pages/VentasPage';
 
 export default function App() {
   return (
@@ -16,7 +17,7 @@ export default function App() {
             <Route index element={<div>Bienvenido</div>} />
             <Route path="login" element={<LoginPage />} />
             <Route path="inventario" element={<InventarioPage />} />
-            <Route path="ventas" element={<div>Página de ventas (por crear)</div>} />
+            <Route path="ventas" element={<VentasPage />} /> 
           </Route>
         </Routes>
       </AuthProvider>
