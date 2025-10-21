@@ -9,6 +9,7 @@ import InventarioPage from './pages/InventarioPage';
 import VentasPage from './pages/VentasPage';
 import VentasHistorialPage from './pages/VentasHistorialPage';
 import Dashboard from './pages/Dashboard';
+import MovimientosPage from './pages/MovimientosPage';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="inventario" element={<InventarioPage />} />
             <Route path="ventas" element={<VentasPage />} />
             <Route path="ventas/historial" element={<VentasHistorialPage />} />
+            <Route path="movimientos" element={<MovimientosPage />} />
           </Route>
         </Routes>
       </AuthProvider>
