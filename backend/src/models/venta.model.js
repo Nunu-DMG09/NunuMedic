@@ -50,3 +50,31 @@ export async function findById(id_venta) {
   venta.items = items;
   return venta;
 }
+
+export async function findAll() {
+  // obtener ventas básicas con cliente (si existe)
+  const [ventas] = await pool.query(
+    `SELECT v.*, DATE_FORMAT(v.fecha, '%Y-%m-%d %H:%i:%s') AS fecha_formateada,
+            c.nombre AS cliente_nombre, c.apellido AS cliente_apellido
+     FROM venta v
+     LEFT JOIN cliente c ON v.id_cliente = c.id_cliente
+     ORDER BY v.fecha DESC`
+  );
+
+  // agregar items a cada venta
+  for (const venta of ventas) {
+    const [items] = await pool.query(
+      `SELECT dv.*, p.nombre_producto
+       FROM detalle_venta dv
+       LEFT JOIN producto p ON dv.id_producto = p.id_producto
+       WHERE dv.id_venta = ?`,
+      [venta.id_venta]
+    );
+    venta.items = items;
+    // usar fecha_formateada si existe
+    venta.fecha = venta.fecha_formateada || venta.fecha;
+    delete venta.fecha_formateada;
+  }
+
+  return ventas;
+}
