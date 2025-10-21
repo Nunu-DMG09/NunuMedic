@@ -1,3 +1,4 @@
+import * as Movimiento from '../models/movimiento_stock.model.js';
 import * as Producto from '../models/producto.model.js';
 import nodemailer from 'nodemailer';
 
@@ -124,10 +125,15 @@ export async function createProducto(req, res) {
     }
 }
 
+
 export async function updateProducto(req, res) {
   try {
     const id = parseInt(req.params.id, 10);
     if (!id) return res.status(400).json({ error: 'ID inválido' });
+
+    // obtener producto actual antes de cambios
+    const existing = await Producto.findById(id);
+    if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
 
     // campos permitidos para actualizar
     const allowed = ['nombre_producto', 'descripcion', 'id_categoria', 'precio_compra', 'precio_venta', 'stock', 'stock_minimo', 'fecha_vencimiento', 'estado'];
@@ -161,8 +167,30 @@ export async function updateProducto(req, res) {
       return res.status(400).json({ error: 'No hay campos para actualizar' });
     }
 
+    // calcular delta de stock si se envió stock en payload
+    const stockBefore = Number(existing.stock ?? 0);
+    const willChangeStock = Object.prototype.hasOwnProperty.call(payload, 'stock');
+    const newStockVal = willChangeStock ? (payload.stock === null ? null : Number(payload.stock)) : stockBefore;
+    const delta = willChangeStock && newStockVal !== null ? (newStockVal - stockBefore) : 0;
+
     const affected = await Producto.updateProducto(id, payload);
     if (!affected) return res.status(404).json({ error: 'Producto no encontrado o sin cambios' });
+
+    // Si hubo cambio de stock, registrar movimiento (entrada/salida)
+    if (willChangeStock && Number.isFinite(delta) && delta !== 0) {
+      try {
+        await Movimiento.createMovimiento({
+          id_producto: id,
+          tipo: delta > 0 ? 'entrada' : 'salida',
+          cantidad: Math.abs(delta),
+          descripcion: `Ajuste por edición de producto`
+        });
+      } catch (movErr) {
+        console.error('Error creando movimiento por ajuste de stock', movErr);
+        // no bloquear la respuesta principal
+      }
+    }
+
     return res.status(200).json({ message: 'Producto actualizado' });
   } catch (err) {
     console.error('updateProducto error', err);
@@ -259,4 +287,44 @@ export async function notifyStockMinimum(req, res) {
     return res.status(500).json({ error: 'Error sending notification', details: err.message ?? String(err) });
   }
 }
+
+
+export async function adjustStockController(req, res) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (!id) return res.status(400).json({ error: 'ID inválido' });
+
+    const { delta, descripcion } = req.body;
+    const d = Number(delta);
+    if (!Number.isFinite(d) || d === 0) {
+      return res.status(400).json({ error: 'delta inválido (debe ser número distinto de 0)' });
+    }
+
+    // comprobar existencia del producto
+    const producto = await Producto.findById(id);
+    if (!producto) return res.status(404).json({ error: 'Producto no encontrado' });
+
+    // aplicar ajuste
+    const affected = await Producto.adjustStock(id, d);
+    if (!affected) return res.status(404).json({ error: 'No se pudo ajustar stock' });
+
+    // crear movimiento de stock correspondiente
+    try {
+      const movimientoId = await Movimiento.createMovimiento({
+        id_producto: id,
+        tipo: d > 0 ? 'entrada' : 'salida',
+        cantidad: Math.abs(d),
+        descripcion: descripcion ?? `Ajuste manual de stock (delta: ${d})`
+      });
+      return res.status(200).json({ message: 'Stock ajustado', id_movimiento: movimientoId });
+    } catch (movErr) {
+      console.error('Error creando movimiento tras ajuste', movErr);
+      return res.status(200).json({ message: 'Stock ajustado (movimiento no registrado)' });
+    }
+  } catch (err) {
+    console.error('adjustStockController error', err);
+    return res.status(500).json({ error: 'Error al ajustar stock' });
+  }
+}
+
 
