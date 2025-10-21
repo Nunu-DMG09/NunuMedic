@@ -4,8 +4,9 @@ import { createVenta, getVentaById, getAllVentas } from '../controllers/venta.co
 const router = express.Router();
 
 router.post('/create', createVenta);
+router.get('/listar', getAllVentas);
 router.get('/:id', getVentaById);
-router.get('/', getAllVentas);
+
 
 
 export default router;
