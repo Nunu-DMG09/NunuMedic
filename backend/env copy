@@ -1,5 +1,12 @@
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=
+DB_PASSWORD=Rakion2016123!
 DB_NAME=nunumed
 PORT=4000
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=anaga123op@gmail.com
+SMTP_PASSWORD=khdifabbwilijkua
+SMTP_PORT=587
+SMTP_SECURE=false
+ALERT_EMAIL_TO=anaga123op@gmail.com
+VITE_FRONTEND_URL=http://localhost:5173
