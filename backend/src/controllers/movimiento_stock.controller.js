@@ -28,3 +28,13 @@ export async function getMovimientosByProducto(req, res) {
     return res.status(500).json({ error: 'Error al obtener movimientos' });
   }
 }
+
+export async function getAllMovimientos(req, res) {
+  try {
+    const rows = await Movimiento.findAll();
+    return res.status(200).json({ data: rows });
+  } catch (err) {
+    console.error('getAllMovimientos error', err);
+    return res.status(500).json({ error: 'Error al obtener movimientos' });
+  }
+}
