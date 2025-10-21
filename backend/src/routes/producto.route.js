@@ -5,7 +5,8 @@ import {
   createProducto,
   updateProducto,
   deleteProducto,
-  notifyStockMinimum
+  notifyStockMinimum,
+  adjustStockController
 } from '../controllers/producto.controller.js';
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.post('/create', createProducto);
 router.put('/:id', updateProducto);
 router.delete('/:id', deleteProducto);
 router.post('/notificacion', notifyStockMinimum);
+router.post('/:id/ajustar-stock', adjustStockController);
 
 export default router;
