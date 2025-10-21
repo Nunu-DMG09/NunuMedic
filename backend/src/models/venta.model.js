@@ -52,16 +52,38 @@ export async function findById(id_venta) {
 }
 
 export async function findAll() {
-  // obtener ventas básicas con cliente (si existe)
-  const [ventas] = await pool.query(
-    `SELECT v.*, DATE_FORMAT(v.fecha, '%Y-%m-%d %H:%i:%s') AS fecha_formateada,
-            c.nombre AS cliente_nombre, c.apellido AS cliente_apellido
-     FROM venta v
-     LEFT JOIN cliente c ON v.id_cliente = c.id_cliente
-     ORDER BY v.fecha DESC`
+  // detectar columna de fecha en la tabla 'venta'
+  const [cols] = await pool.query(
+    'SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?',
+    [process.env.DB_NAME, 'venta']
   );
+  const colNames = cols.map(c => c.COLUMN_NAME);
+  const dateCol = colNames.includes('fecha') ? 'fecha'
+    : colNames.includes('created_at') ? 'created_at'
+    : colNames.includes('fecha_venta') ? 'fecha_venta'
+    : null;
 
-  // agregar items a cada venta
+  let sql;
+  if (dateCol) {
+    sql = `
+      SELECT v.*, DATE_FORMAT(v.${dateCol}, '%Y-%m-%d %H:%i:%s') AS fecha_formateada,
+             c.nombre AS cliente_nombre, c.apellido AS cliente_apellido
+      FROM venta v
+      LEFT JOIN cliente c ON v.id_cliente = c.id_cliente
+      ORDER BY v.${dateCol} DESC
+    `;
+  } else {
+    sql = `
+      SELECT v.*, c.nombre AS cliente_nombre, c.apellido AS cliente_apellido
+      FROM venta v
+      LEFT JOIN cliente c ON v.id_cliente = c.id_cliente
+      ORDER BY v.id_venta DESC
+    `;
+  }
+
+  const [ventas] = await pool.query(sql);
+
+  // Cargar items de detalle_venta para cada venta
   for (const venta of ventas) {
     const [items] = await pool.query(
       `SELECT dv.*, p.nombre_producto
@@ -71,9 +93,10 @@ export async function findAll() {
       [venta.id_venta]
     );
     venta.items = items;
-    // usar fecha_formateada si existe
-    venta.fecha = venta.fecha_formateada || venta.fecha;
-    delete venta.fecha_formateada;
+    if (dateCol) {
+      venta.fecha = venta.fecha_formateada || venta[dateCol] || null;
+      delete venta.fecha_formateada;
+    }
   }
 
   return ventas;
