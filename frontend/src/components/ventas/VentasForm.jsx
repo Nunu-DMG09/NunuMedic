@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 
-export default function VentasForm() {
+export default function VentasForm({ cliente = null }) {
   const [productos, setProductos] = useState([]);
   const [clients, setClients] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -15,11 +15,26 @@ export default function VentasForm() {
 
   useEffect(() => { fetchProductos(); fetchClientes(); }, []);
 
+  // Si se pasa un cliente desde la página externa (ClienteForm), usarlo
+  useEffect(() => {
+    if (cliente) {
+      // soporta distintas claves (id_cliente o id)
+      const id = cliente.id_cliente ?? cliente.id ?? '';
+      setIdCliente(id ? String(id) : '');
+      setClienteNombre(`${cliente.nombre ?? ''}${cliente.apellido ? ' ' + cliente.apellido : ''}`);
+      // agregar a lista de clientes locales si no existe (para el select)
+      setClients(prev => {
+        const exists = prev.some(c => String(c.id_cliente ?? c.id ?? '') === String(id));
+        if (exists) return prev;
+        return [{ id_cliente: id, nombre: cliente.nombre, apellido: cliente.apellido, dni: cliente.dni ?? '' }, ...prev];
+      });
+    }
+  }, [cliente]);
+
   async function fetchProductos() {
     setLoadingProducts(true);
     try {
       const res = await api.get('/api/productos/listar', { validateStatus: false });
-      // normalizar como en otros componentes
       let items = [];
       if (Array.isArray(res.data)) items = res.data;
       else if (res.data && Array.isArray(res.data.productos)) items = res.data.productos;
@@ -81,7 +96,6 @@ export default function VentasForm() {
         total,
         items: cart.map(i => ({ id_producto: i.id_producto, cantidad: Number(i.cantidad), precio_unitario: Number(i.precio_unitario) })),
         id_cliente: id_cliente ? Number(id_cliente) : null,
-        // si quieres enviar el nombre del cliente como extra, el backend debe aceptar el campo (no incluido por defecto)
         metodo_pago: metodoPago
       };
       const res = await api.post('/api/ventas/create', payload);
