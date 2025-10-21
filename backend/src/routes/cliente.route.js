@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get('/', getAllClientes);
 router.get('/:id', getClienteById);
-router.post('/', createCliente);
+router.post('/create', createCliente);
 
 export default router;
