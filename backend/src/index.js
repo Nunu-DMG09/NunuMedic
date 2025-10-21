@@ -14,7 +14,11 @@ import authRoute from './routes/auth.route.js';
 dotenv.config();
 
 const app = express();
-app.use(corsMiddleware);
+app.use(cors({
+  origin: process.env.VITE_FRONTEND_URL || 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

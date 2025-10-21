@@ -30,3 +30,13 @@ export async function getVentaById(req, res) {
     return res.status(500).json({ error: 'Error al obtener venta' });
   }
 }
+
+export async function getAllVentas(req, res) {
+  try {
+    const rows = await Venta.findAll();
+    return res.status(200).json({ data: rows });
+  } catch (err) {
+    console.error('getAllVentas error', err);
+    return res.status(500).json({ error: 'Error al obtener ventas' });
+  }
+}
