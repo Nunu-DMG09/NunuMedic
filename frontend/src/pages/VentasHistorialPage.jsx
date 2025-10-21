@@ -13,7 +13,7 @@ export default function VentasHistorialPage() {
   async function fetchVentas() {
     setLoading(true);
     try {
-      const res = await api.get('api/ventas');
+      const res = await api.get('api/ventas/listar');
       setVentas(res.data.data || []);
     } catch (err) {
       console.error('fetchVentas', err);
