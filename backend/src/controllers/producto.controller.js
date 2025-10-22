@@ -207,17 +207,25 @@ export async function updateProducto(req, res) {
 }
 
 export async function deleteProducto(req, res) {
-    try {
-        const id = parseInt(req.params.id, 10);
-        if (!id) return res.status(400).json({ error: 'ID inválido' });
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (!id) return res.status(400).json({ error: 'ID inválido' });
 
-        const affected = await Producto.deleteProducto(id);
-        if (!affected) return res.status(404).json({ error: 'Producto no encontrado' });
-        return res.status(200).json({ message: 'Producto eliminado' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Error al eliminar producto' });
+    const affected = await Producto.deleteProducto(id);
+    if (!affected) return res.status(404).json({ error: 'Producto no encontrado' });
+    return res.status(200).json({ message: 'Producto eliminado' });
+  } catch (err) {
+    console.error('deleteProducto error', err);
+
+    // Errores de FK (MySQL): ER_ROW_IS_REFERENCED_2 / ER_ROW_IS_REFERENCED
+    if (err && (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED' || /foreign key/i.test(err.message || err.sqlMessage || ''))) {
+      return res.status(400).json({
+        error: 'No se puede eliminar el producto porque existen registros relacionados (ventas o movimientos). Elimina o desvincula primero las filas relacionadas en detalle_venta / movimiento_stock.'
+      });
     }
+
+    return res.status(500).json({ error: 'Error al eliminar producto' });
+  }
 }
 
 export async function notifyStockMinimum(req, res) {
