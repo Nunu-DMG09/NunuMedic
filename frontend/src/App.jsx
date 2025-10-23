@@ -10,6 +10,7 @@ import VentasPage from './pages/VentasPage';
 import VentasHistorialPage from './pages/VentasHistorialPage';
 import Dashboard from './pages/Dashboard';
 import MovimientosPage from './pages/MovimientosPage';
+import AdminsPage from './pages/AdminsPage';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="ventas" element={<VentasPage />} />
             <Route path="ventas/historial" element={<VentasHistorialPage />} />
             <Route path="movimientos" element={<MovimientosPage />} />
+            <Route path="admins" element={<AdminsPage />} />
           </Route>
         </Routes>
       </AuthProvider>
