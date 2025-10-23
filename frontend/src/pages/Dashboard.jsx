@@ -55,7 +55,7 @@ export default function Dashboard() {
           subtitle="Gestionar usuarios del sistema"
           bg="linear-gradient(135deg,#e6f0ff,#e9f2ff)"
           icon={IconUsers}
-          href="/usuarios"
+          href="/admins"
         />
         <ModuleCard
           title="Hacer Ventas"
