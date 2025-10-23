@@ -26,3 +26,13 @@ export async function createUsuario(req, res) {
     return res.status(500).json({ error: 'Error al crear usuario' });
   }
 }
+
+export async function getAllUsuarios(req, res) {
+  try {
+    const users = await Usuario.findAll();
+    return res.status(200).json(users); // devuelve arreglo puro
+  } catch (err) {
+    console.error('getAllUsuarios error', err);
+    return res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+}
