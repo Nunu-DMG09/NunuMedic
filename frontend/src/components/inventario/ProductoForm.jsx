@@ -36,7 +36,7 @@ export default function ProductoForm({ product, onCreated,onUpdated, onClose }) 
     async function loadCats() {
       setCatLoading(true);
       try {
-        const res = await api.get('/api/categorias', { validateStatus: false });
+        const res = await api.get('/api/categorias/listar', { validateStatus: false });
         // soporta varias formas
         const data = res.data;
         let items = [];
@@ -191,7 +191,7 @@ export default function ProductoForm({ product, onCreated,onUpdated, onClose }) 
             <option value="" className="bg-slate-800 text-slate-100">— Seleccionar —</option>
             <option value="disponible" className="bg-slate-800 text-slate-100">Disponible</option>
             <option value="agotado" className="bg-slate-800 text-slate-100">Agotado</option>
-            <option value="vencimiento" className="bg-slate-800 text-slate-100">A punto de vencer</option>
+            <option value="vencimiento" className="bg-slate-800 text-slate-100">Vencido</option>
           </select>
         </div>
 
