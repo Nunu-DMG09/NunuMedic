@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.get('/', getAllCategorias);
+router.get('/listar', getAllCategorias);
 router.get('/:id', getCategoriaById);
 router.post('/', createCategoria);
 router.put('/:id', updateCategoria);
