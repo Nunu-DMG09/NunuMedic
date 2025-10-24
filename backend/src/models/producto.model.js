@@ -72,3 +72,127 @@ export async function adjustStock(id_producto, delta) {
   const [result] = await pool.query('UPDATE producto SET stock = GREATEST(0, stock + ?) WHERE id_producto = ?', [delta, id_producto]);
   return result.affectedRows;
 }
+
+export async function findByName(term) {
+  const q = `%${String(term ?? '').trim().toLowerCase()}%`;
+  const sql = `
+    SELECT p.*, c.nombre_categoria AS categoria_nombre
+    FROM producto p
+    LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+    WHERE LOWER(p.nombre_producto) LIKE ?
+    ORDER BY p.id_producto DESC
+  `;
+  try {
+    console.log('[producto.model.findByName] sql:', sql.replace(/\s+/g,' '), 'params:', [q]);
+    const [rows] = await pool.query(sql, [q]);
+    console.log('[producto.model.findByName] rows:', Array.isArray(rows) ? rows.length : String(rows));
+    return rows.map(r => ({
+      ...r,
+      categoria_nombre: r.categoria_nombre ?? null,
+      categoria: r.id_categoria != null ? { id_categoria: r.id_categoria, nombre: r.categoria_nombre ?? null } : null
+    }));
+  } catch (err) {
+    console.error('findByName SQL error', { sql, params: [q], err: err.message ?? err });
+    throw err;
+  }
+}
+
+export async function findByCategoriaName(catName) {
+  const q = `%${String(catName ?? '').trim().toLowerCase()}%`;
+  const [rows] = await pool.query(
+    `SELECT p.*, c.nombre_categoria AS categoria_nombre
+     FROM producto p
+     JOIN categoria c ON p.id_categoria = c.id_categoria
+     WHERE LOWER(c.nombre_categoria) LIKE ?
+     ORDER BY p.id_producto DESC`,
+    [q]
+  );
+  return rows.map(r => ({
+    ...r,
+    categoria_nombre: r.categoria_nombre ?? null,
+    categoria: r.id_categoria != null ? { id_categoria: r.id_categoria, nombre: r.categoria_nombre ?? null } : null
+  }));
+}
+
+export async function findByEstado(estado) {
+  const [rows] = await pool.query(
+    `SELECT p.*, c.nombre_categoria AS categoria_nombre
+     FROM producto p
+     LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+     WHERE p.estado = ?
+     ORDER BY p.id_producto DESC`,
+    [estado]
+  );
+  return rows.map(r => ({
+    ...r,
+    categoria_nombre: r.categoria_nombre ?? null,
+    categoria: r.id_categoria != null ? { id_categoria: r.id_categoria, nombre: r.categoria_nombre ?? null } : null
+  }));
+}
+
+export async function findPaginated({ page = 1, perPage = 10, search = null, categoria = null, estado = null, minStock = null, maxStock = null } = {}) {
+  const where = [];
+  const params = [];
+
+  if (search) {
+    where.push('(LOWER(p.nombre_producto) LIKE ? OR LOWER(p.descripcion) LIKE ?)');
+    const q = `%${String(search).trim().toLowerCase()}%`;
+    params.push(q, q);
+  }
+  if (categoria) {
+    // acepta id o nombre (si es numérico se usa id, sino nombre LIKE)
+    if (!isNaN(Number(categoria))) {
+      where.push('p.id_categoria = ?');
+      params.push(Number(categoria));
+    } else {
+      where.push('LOWER(c.nombre_categoria) LIKE ?');
+      params.push(`%${String(categoria).trim().toLowerCase()}%`);
+    }
+  }
+  if (estado) {
+    where.push('p.estado = ?');
+    params.push(estado);
+  }
+  if (minStock !== null && minStock !== undefined && minStock !== '') {
+    where.push('p.stock >= ?');
+    params.push(Number(minStock));
+  }
+  if (maxStock !== null && maxStock !== undefined && maxStock !== '') {
+    where.push('p.stock <= ?');
+    params.push(Number(maxStock));
+  }
+
+  const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
+
+  const [countRows] = await pool.query(
+    `SELECT COUNT(*) AS total
+     FROM producto p
+     LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+     ${whereSql}`,
+    params
+  );
+  const total = Number(countRows[0]?.total ?? 0);
+
+  const limit = Number(perPage) || 10;
+  const pageNum = Math.max(1, Number(page) || 1);
+  const offset = (pageNum - 1) * limit;
+
+  const sql = `
+    SELECT p.*, c.nombre_categoria AS categoria_nombre
+    FROM producto p
+    LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+    ${whereSql}
+    ORDER BY p.id_producto DESC
+    LIMIT ? OFFSET ?
+  `;
+  const execParams = [...params, limit, offset];
+  const [rows] = await pool.query(sql, execParams);
+
+  const items = rows.map(r => ({
+    ...r,
+    categoria_nombre: r.categoria_nombre ?? null,
+    categoria: r.id_categoria != null ? { id_categoria: r.id_categoria, nombre: r.categoria_nombre ?? null } : null
+  }));
+
+  return { items, total, page: pageNum, perPage: limit, totalPages: Math.max(1, Math.ceil(total / limit)) };
+}
