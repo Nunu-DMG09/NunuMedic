@@ -2,6 +2,8 @@ import * as Movimiento from '../models/movimiento_stock.model.js';
 import * as Producto from '../models/producto.model.js';
 import nodemailer from 'nodemailer';
 
+const ProductoModel = Producto;
+
 // Helpers
 function toNumberOrNull(val) {
     if (val === undefined || val === null || val === '') return null;
@@ -334,5 +336,81 @@ export async function adjustStockController(req, res) {
     return res.status(500).json({ error: 'Error al ajustar stock' });
   }
 }
+
+// Buscar por nombre de producto (segmento URL: /api/productos/buscar/:q)
+export async function searchByNameController(req, res) {
+  try {
+    const raw = String(req.params.q || '').trim();
+    if (!raw) return res.status(400).json({ error: 'Término de búsqueda requerido' });
+
+    // decodificar por si viene con %20
+    const term = decodeURIComponent(raw);
+    console.log('[searchByNameController] term:', term);
+
+    const rows = await ProductoModel.findByName(term);
+    console.log('[searchByNameController] found:', Array.isArray(rows) ? rows.length : 0);
+
+    // devolver resultado con conteo para debug
+    return res.status(200).json({ term, count: Array.isArray(rows) ? rows.length : 0, data: rows });
+  } catch (err) {
+    console.error('searchByNameController error', err && err.stack ? err.stack : err);
+    return res.status(500).json({ error: 'Error al buscar productos por nombre' });
+  }
+}
+
+// Buscar por nombre de categoría (segmento URL: /api/productos/categoria/:name)
+export async function productosByCategoriaNameController(req, res) {
+  try {
+    const name = String(req.params.name || '').trim();
+    if (!name) return res.status(400).json({ error: 'Nombre de categoría requerido' });
+    const rows = await ProductoModel.findByCategoriaName(name);
+    return res.status(200).json({ data: rows });
+  } catch (err) {
+    console.error('productosByCategoriaNameController error', err);
+    return res.status(500).json({ error: 'Error al obtener productos por categoría' });
+  }
+}
+
+// Productos por estado (puede aceptar ?page= y ?perPage= para paginar)
+export async function productosByEstadoController(req, res) {
+  try {
+    const estado = String(req.params.estado || '').trim();
+    if (!estado) return res.status(400).json({ error: 'Estado inválido' });
+
+    const page = Number(req.query.page || 0);
+    const perPage = Number(req.query.perPage || 10);
+
+    if (page > 0) {
+      const result = await ProductoModel.findPaginated({ page, perPage, estado });
+      return res.status(200).json(result);
+    } else {
+      const rows = await ProductoModel.findByEstado(estado);
+      return res.status(200).json({ data: rows });
+    }
+  } catch (err) {
+    console.error('productosByEstadoController error', err);
+    return res.status(500).json({ error: 'Error al obtener productos por estado' });
+  }
+}
+
+// Paginación general: /api/productos/paginar?page=1 (perPage opcional, por defecto 10)
+export async function paginarProductosController(req, res) {
+  try {
+    const page = Math.max(1, Number(req.query.page || 1));
+    const perPage = Number(req.query.perPage || 10);
+    const search = req.query.search ?? null;
+    const categoria = req.query.categoria ?? null;
+    const estado = req.query.estado ?? null;
+    const minStock = req.query.minStock ?? null;
+    const maxStock = req.query.maxStock ?? null;
+
+    const result = await ProductoModel.findPaginated({ page, perPage, search, categoria, estado, minStock, maxStock });
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error('paginarProductosController error', err);
+    return res.status(500).json({ error: 'Error en paginación de productos' });
+  }
+}
+
 
 
