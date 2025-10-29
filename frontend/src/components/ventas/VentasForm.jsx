@@ -231,10 +231,10 @@ export default function VentasForm({ cliente = null }) {
                     onChange={e => setMetodoPago(e.target.value)}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                   >
-                    <option value="efectivo">💵 Efectivo</option>
-                    <option value="tarjeta">💳 Tarjeta</option>
-                    <option value="yape">📱 Yape</option>
-                    <option value="plin">📲 Plin</option>
+                    <option value="efectivo"> Efectivo</option>
+                    <option value="tarjeta"> Tarjeta</option>
+                    <option value="yape"> Yape</option>
+                    <option value="plin"> Plin</option>
                   </select>
                 </div>
               </div>
