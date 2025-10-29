@@ -140,7 +140,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-6">
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                  NUNUMED Dashboard
+                  NUNUMEDIC - Dashboard
                 </h1>
                 <p className="text-slate-600 text-base mt-1">Panel de control administrativo</p>
               </div>
@@ -158,9 +158,9 @@ export default function Dashboard() {
               
               <div className="flex items-center gap-4 px-5 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50">
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold">AD</span>
+                  <span className="text-white font-semibold">DM</span>
                 </div>
-                <span className="font-semibold text-slate-700 text-base">Administrador</span>
+                <span className="font-semibold text-slate-700 text-base">Luis David Mesta Gonzales</span>
               </div>
             </div>
           </div>
