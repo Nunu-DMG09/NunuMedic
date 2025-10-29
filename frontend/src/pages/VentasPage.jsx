@@ -66,7 +66,7 @@ export default function VentasPage() {
                   onClick={clearCliente}
                   className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105"
                 >
-                  Cambiar Cliente
+                  Registrar otra venta
                 </button>
               </div>
             </div>
