@@ -1,30 +1,17 @@
-/* ...existing code... */
+
 @import "tailwindcss";
 
-/* Paleta Nunumed (azules) y variables globales */
+/* Paleta base: Azul / Rojo / Blanco */
 :root{
-  --nunumed-50:  #f5f9ff;
-  --nunumed-100: #e6f0ff;
-  --nunumed-200: #bfe0ff;
-  --nunumed-300: #99d1ff;
-  --nunumed-400: #4da8ff;
-  --nunumed-500: #1e7bff;
-  --nunumed-600: #165fe6;
-  --nunumed-700: #0f46b3;
-  --nunumed-800: #0a2f80;
-  --nunumed-900: #141a29;
+  --color-blue:  #1e7bff; /* primary blue */
+  --color-blue-dark: #165fe6;
+  --color-red:   #e43b3b; /* primary red */
+  --color-white: #ffffff;
 
-  --bg: #141a29;
-  --surface: #ffffff;
-  --muted: #6b7280;
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --shadow-soft: 0 6px 18px rgba(9,30,66,0.06);
-  --transition-fast: 180ms cubic-bezier(.2,.9,.2,1);
+  --bg: var(--color-white);
 }
 
-/* Reset & base */
+/* Reset mínimo */
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
 body {
@@ -32,13 +19,12 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #141a29;
-  color: #0f172a;
+  background-color: var(--bg);
+  color: #0b1220; /* texto por defecto (oscuro sobre blanco) */
   line-height: 1.4;
-  -webkit-font-synthesis: none;
 }
 
-/* Layout container */
+/* Contenedor base */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -46,185 +32,7 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-.app-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--nunumed-700);
-}
-.app-subtitle {
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-/* Card */
-.card {
-  background: var(--surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-soft);
-  padding: 1rem;
-  border: 1px solid rgba(8,20,45,0.03);
-}
-
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .55rem .9rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn:active { transform: translateY(1px); }
-
-.btn-primary {
-  background: linear-gradient(180deg,var(--nunumed-500), var(--nunumed-600));
-  color: white;
-  border: none;
-  box-shadow: 0 6px 18px rgba(30,123,255,0.18);
-}
-.btn-primary:hover { filter: brightness(.96); }
-.btn-primary:focus { outline: 3px solid rgba(30,123,255,0.18); outline-offset: 2px; }
-
-.btn-outline {
-  background: transparent;
-  color: var(--nunumed-600);
-  border: 1px solid rgba(30,123,255,0.14);
-}
-.btn-outline:hover { background: rgba(30,123,255,0.06); }
-
-/* Inputs */
-.input {
-  width: 100%;
-  padding: .55rem .75rem;
-  border-radius: 8px;
-  border: 1px solid #e6eef8;
-  background: #fff;
-  color: #0b1220;
-  font-size: .95rem;
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
-}
-.input:focus {
-  outline: none;
-  box-shadow: 0 6px 18px rgba(30,123,255,0.08);
-  border-color: var(--nunumed-400);
-}
-
-/* Small helpers */
-.small-muted { color: var(--muted); font-size: .9rem; }
-.badge {
-  display: inline-block;
-  padding: .25rem .5rem;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--nunumed-100), rgba(77,168,255,0.06));
-  color: var(--nunumed-700);
-  font-weight: 600;
-  font-size: .8rem;
-}
-
-/* Product grid and responsive */
-.product-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-}
-@media (min-width: 640px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (min-width: 1024px) {
-  .product-grid { grid-template-columns: repeat(3, 1fr); }
-}
-
-/* Utilities for lists / cards inside grid */
-.product-card { display: flex; flex-direction: column; gap: .5rem; }
-.product-header { display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
-
-/* Tables / list styles (ventas) */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: .95rem;
-}
-.table th, .table td {
-  padding: .6rem .75rem;
-  text-align: left;
-  border-bottom: 1px solid rgba(15,23,42,0.05);
-}
-.table th { color: var(--muted); font-weight: 600; font-size: .85rem; }
-
-/* Focus and accessibility */
-:focus { outline: none; }
-a:focus-visible, button:focus-visible, .input:focus { box-shadow: 0 6px 18px rgba(30,123,255,0.12); }
-
-/* Footer spacing helper */
+/* Mantengo helpers mínimos para compatibilidad rápida */
 .mt-4 { margin-top: 1rem; }
 .mb-6 { margin-bottom: 1.5rem; }
 
-/* Dark mode (optional) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #141a29;
-    --surface: #071127;
-    --muted: #94a3b8;
-  }
-  body { background: var(--bg); color: #e6eef8; }
-  .card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.04); box-shadow: none; }
-  .input { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); color: #e6eef8; }
-  .btn-outline { color: var(--nunumed-200); border-color: rgba(77,168,255,0.12); }
-}
-
-/* PARA EL MODAL */
-
-/* Modal: overlay, backdrop blur y carta centrada */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  pointer-events: auto;
-}
-
-/* semitransparente + blur (soporta navegadores que implementen backdrop-filter) */
-.modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(2,6,23,0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  transition: opacity .18s ease;
-}
-
-/* carta del modal sobre el backdrop */
-.modal-card {
-  position: relative;
-  z-index: 1;
-  width: min(920px, 96%);
-  max-height: 90vh;
-  overflow: auto;
-  padding: 16px;
-  border-radius: 10px;
-  box-shadow: 0 12px 30px rgba(2,6,23,0.5);
-  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,255,0.98));
-  transition: transform .18s ease, opacity .18s ease;
-  transform: translateY(0);
-}
-
-/* pequeño ajuste para móviles */
-@media (max-width: 480px) {
-  .modal-card { padding: 12px; border-radius: 8px; }
-}
-
-/* ...existing code... */
