@@ -5,30 +5,52 @@ export default function Modal({ children, onClose, title }) {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
     >
-      {/* backdrop: semitransparente + blur */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      {/* Backdrop with blur */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      {/* modal card */}
+      {/* Modal card */}
       <div
-        className="relative z-10 w-full max-w-3xl mx-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl ring-1 ring-black/5 p-6"
+        className="relative z-10 w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200/50 overflow-hidden"
         role="document"
         aria-label={title || 'Modal'}
       >
-        <div className="flex items-start justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{title || 'Modal'}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="ml-4 inline-flex items-center px-3 py-1.5 border rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            Cerrar
-          </button>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-indigo-900 px-8 py-6 relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full translate-y-12 -translate-x-12"></div>
+          
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white">{title || 'Modal'}</h3>
+                <p className="text-slate-300 text-sm mt-1">Complete la información requerida</p>
+              </div>
+            </div>
+            
+            <button
+              type="button"
+              onClick={onClose}
+              className="group p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105"
+              title="Cerrar modal"
+            >
+              <svg className="w-5 h-5 text-white group-hover:text-slate-200 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <div className="text-slate-700 dark:text-slate-200">
+        {/* Content */}
+        <div className="p-8 bg-gradient-to-b from-white to-slate-50 max-h-[70vh] overflow-y-auto">
           {children}
         </div>
       </div>
