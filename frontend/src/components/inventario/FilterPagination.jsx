@@ -96,9 +96,9 @@ export default function FilterPagination({
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer"
               >
                 <option value="">Todos los estados</option>
-                <option value="disponible">✅ Disponible</option>
-                <option value="agotado">🚫 Agotado</option>
-                <option value="vencimiento">⚠️ Por vencer</option>
+                <option value="disponible">Disponible</option>
+                <option value="agotado">Agotado</option>
+                <option value="vencimiento">Por vencer</option>
               </select>
               <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                 <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
