@@ -18,8 +18,8 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<MainLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="login" element={<LoginPage />} />
+            <Route index element={<LoginPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="inventario" element={<InventarioPage />} />
             <Route path="ventas" element={<VentasPage />} />
             <Route path="ventas/historial" element={<VentasHistorialPage />} />
