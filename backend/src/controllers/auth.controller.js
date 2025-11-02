@@ -43,3 +43,32 @@ export async function login(req, res) {
         return res.status(500).json({ error: 'Error en login' });
     }
 }
+
+export function logout(req, res) {
+  try {
+    const auth = req.headers.authorization || req.body?.token || req.query?.token;
+    if (!auth) {
+      // no token -> igualmente responder ok (cliente debe limpiar)
+      return res.status(200).json({ message: 'Cierre de sesión OK' });
+    }
+    const token = auth.startsWith('Bearer ') ? auth.split(' ')[1] : auth;
+    if (token) {
+      revokedTokens.add(token);
+      console.log('[LOGOUT] token revocado');
+    }
+    return res.status(200).json({ message: 'Cierre de sesión OK' });
+  } catch (err) {
+    console.error('Logout error', err);
+    return res.status(500).json({ error: 'Error al cerrar sesión' });
+  }
+}
+
+// Helper para comprobar si un token fue revocado
+export function isTokenRevoked(token) {
+  return revokedTokens.has(token);
+}
+
+// Opcional: función para revocar manualmente
+export function revokeToken(token) {
+  if (token) revokedTokens.add(token);
+}
