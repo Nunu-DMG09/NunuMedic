@@ -1,18 +1,29 @@
-
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 
 function fmtFecha(input) {
-  if (!input) return null;
-  const s = String(input).trim();
-  // si ya viene YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  // DD-MM-YYYY o DD/MM/YYYY -> YYYY-MM-DD
-  const m1 = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-  const m2 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (m1) return `${m1[3]}-${m1[2]}-${m1[1]}`;
-  if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
-  return input;
+  if (!input) return '';
+  // si ya viene YYYY-MM-DD exacto
+  if (typeof input === 'string') {
+    const s = input.trim();
+    // ISO datetime: "2025-10-23T00:00:00.000Z"
+    if (s.includes('T')) return s.split('T')[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    // DD-MM-YYYY o DD/MM/YYYY -> YYYY-MM-DD
+    const m1 = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    const m2 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (m1) return `${m1[3]}-${m1[2]}-${m1[1]}`;
+    if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
+  }
+
+  // intentar parsear con Date y devolver YYYY-MM-DD
+  try {
+    const d = new Date(input);
+    if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+  } catch (e) { /* ignore */ }
+
+  // fallback: cadena
+  return String(input);
 }
 
 export default function ProductoForm({ product, onCreated, onUpdated, onClose }) {
@@ -67,6 +78,7 @@ export default function ProductoForm({ product, onCreated, onUpdated, onClose })
         precio_venta: product.precio_venta ?? '',
         stock: product.stock ?? '',
         stock_minimo: product.stock_minimo ?? '',
+        // ahora fmtFecha siempre devuelve YYYY-MM-DD o '' => input[type=date] mostrará correctamente
         fecha_vencimiento: product.fecha_vencimiento ? fmtFecha(product.fecha_vencimiento) : '',
         estado: product.estado ?? '',
       });
