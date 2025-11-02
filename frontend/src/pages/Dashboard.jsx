@@ -9,8 +9,9 @@ export default function Dashboard() {
     totalIngresos: 0,
     ingresosHoy: 0,
     totalProductos: 0,
-    productosActivos: 0,
+    productosDisponibles: 0, // cambiado: muestra solo los con estado 'disponible'
     movimientosHoy: 0,
+    movimientosTotal: 0,     // nuevo: total de movimientos
     usuariosActivos: 0,
     ventasRecientes: [],
     productosPopulares: [],
@@ -33,37 +34,98 @@ export default function Dashboard() {
         api.get('/api/usuarios/listar').catch(() => ({ data: { data: [] } }))
       ]);
 
-      const ventas = ventasRes.data?.data || [];
-      const productos = productosRes.data?.data || [];
-      const movimientos = movimientosRes.data?.items || [];
-      const usuarios = usuariosRes.data?.data || [];
+      // Normalizar respuestas
+      const ventas = ventasRes?.data?.data || ventasRes?.data?.ventas || ventasRes?.data || [];
+      const productos = productosRes?.data?.data || productosRes?.data?.productos || productosRes?.data || [];
+      const movimientos = movimientosRes?.data?.items || movimientosRes?.data?.data || movimientosRes?.data || [];
+      const usuarios = usuariosRes?.data?.data || usuariosRes?.data || [];
 
-      // Calcular estadísticas
+      // Fecha hoy en formato YYYY-MM-DD
       const today = new Date().toISOString().split('T')[0];
-      const ventasHoy = ventas.filter(v => v.fecha?.startsWith(today));
-      const movimientosHoy = movimientos.filter(m => m.fecha_movimiento?.startsWith(today));
-      
-      const totalIngresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
-      const ingresosHoy = ventasHoy.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
-      
-      const productosActivos = productos.filter(p => p.estado === 'activo');
 
-      // Top productos (simulado basado en ventas)
-      const productosPopulares = productos.slice(0, 5).map((p, i) => ({
-        nombre: p.nombre_producto,
-        ventas: Math.floor(Math.random() * 50) + 10,
-        ingresos: Math.floor(Math.random() * 5000) + 1000
-      }));
+      // ventasHoy
+      const ventasHoy = ventas.filter(v => {
+        const f = v.fecha || v.fecha_venta || v.created_at || v.fecha_creacion || '';
+        if (!f) return false;
+        try {
+          return f.startsWith ? f.startsWith(today) : new Date(f).toISOString().startsWith(today);
+        } catch {
+          return false;
+        }
+      });
+
+      // movimientosHoy
+      const movimientosHoyArr = movimientos.filter(m => {
+        const f = m.fecha_movimiento || m.fecha || m.created_at || '';
+        if (!f) return false;
+        try {
+          return f.startsWith ? f.startsWith(today) : new Date(f).toISOString().startsWith(today);
+        } catch {
+          return false;
+        }
+      });
+
+      // Conteos y totales
+      const totalIngresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || v.total_venta || 0), 0);
+      const ingresosHoy = ventasHoy.reduce((sum, v) => sum + parseFloat(v.total || v.total_venta || 0), 0);
+
+      // Productos disponibles: solo contar los con estado === 'disponible'
+      const productosDisponibles = productos.filter(p => String(p.estado).toLowerCase() === 'disponible').length;
+
+      // Productos activos/total
+      const totalProductos = productos.length;
+
+      // Construir top productos (igual que antes)...
+      const prodMap = new Map();
+      ventas.forEach(v => {
+        const items = v.items || v.detalles || v.detalle || v.productos || v.items_venta || [];
+        if (!Array.isArray(items) || items.length === 0) return;
+        items.forEach(it => {
+          const qty = Number(it.cantidad || it.qty || it.cantidad_producto || it.cantidad_venta) || 1;
+          const price = Number(it.precio || it.precio_venta || it.precio_unitario || it.valor) || 0;
+          const id = it.id_producto || it.producto_id || it.producto?.id || it.id || JSON.stringify(it.nombre_producto || it.producto_nombre || it.producto?.nombre || it.nombre || 'desconocido');
+          const nombre = it.nombre_producto || it.producto_nombre || it.producto?.nombre_producto || it.producto?.nombre || it.nombre || 'Desconocido';
+          const key = String(id);
+          if (!prodMap.has(key)) prodMap.set(key, { nombre, ventas: 0, ingresos: 0 });
+          const entry = prodMap.get(key);
+          entry.ventas += qty;
+          entry.ingresos += qty * price;
+        });
+      });
+
+      if (prodMap.size === 0 && ventas.length > 0) {
+        ventas.forEach(v => {
+          const pid = v.producto_id || v.id_producto || v.producto?.id;
+          const nombre = v.producto_nombre || v.nombre_producto || (pid ? String(pid) : 'Desconocido');
+          const qty = Number(v.cantidad || 1);
+          const price = Number(v.total || v.precio || 0);
+          const key = String(pid || nombre);
+          if (!prodMap.has(key)) prodMap.set(key, { nombre, ventas: 0, ingresos: 0 });
+          const entry = prodMap.get(key);
+          entry.ventas += qty;
+          entry.ingresos += price;
+        });
+      }
+
+      let productosPopulares = Array.from(prodMap.values()).sort((a, b) => b.ventas - a.ventas).slice(0, 5);
+      if (productosPopulares.length === 0) {
+        productosPopulares = productos.slice(0, 5).map((p, i) => ({
+          nombre: p.nombre_producto || p.producto_nombre || p.nombre || `Producto ${i + 1}`,
+          ventas: 0,
+          ingresos: 0
+        }));
+      }
 
       setStats({
         totalVentas: ventas.length,
         ventasHoy: ventasHoy.length,
         totalIngresos: totalIngresos,
         ingresosHoy: ingresosHoy,
-        totalProductos: productos.length,
-        productosActivos: productosActivos.length,
-        movimientosHoy: movimientosHoy.length,
-        usuariosActivos: usuarios.filter(u => u.estado === 'activo').length,
+        totalProductos: totalProductos,
+        productosDisponibles: productosDisponibles,
+        movimientosHoy: movimientosHoyArr.length,
+        movimientosTotal: movimientos.length,
+        usuariosActivos: usuarios.filter(u => String(u.estado).toLowerCase() === 'activo').length,
         ventasRecientes: ventas.slice(0, 6),
         productosPopulares: productosPopulares,
         loading: false
@@ -123,7 +185,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Productos */}
+          {/* Productos (ahora "Disponibles") */}
           <div className="bg-white rounded-2xl p-8 shadow-xl border border-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-100 to-violet-100 rounded-full -translate-y-20 translate-x-20"></div>
             <div className="relative">
@@ -134,8 +196,8 @@ export default function Dashboard() {
                   </svg>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-slate-600 mb-1">Activos</div>
-                  <div className="text-xl font-bold text-slate-800">{stats.productosActivos}</div>
+                  <div className="text-sm text-slate-600 mb-1">Disponibles</div>
+                  <div className="text-xl font-bold text-slate-800">{stats.productosDisponibles}</div>
                 </div>
               </div>
               <div className="text-sm text-slate-600 mb-2">Total Productos</div>
@@ -144,7 +206,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Actividad */}
+          {/* Actividad (movimientos): mostrar Hoy en la esquina y Totales en el número grande */}
           <div className="bg-white rounded-2xl p-8 shadow-xl border border-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full -translate-y-20 translate-x-20"></div>
             <div className="relative">
@@ -155,12 +217,12 @@ export default function Dashboard() {
                   </svg>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-slate-600 mb-1">Usuarios</div>
-                  <div className="text-xl font-bold text-slate-800">{stats.usuariosActivos}</div>
+                  <div className="text-sm opacity-90 mb-1">Hoy</div>
+                  <div className="text-xl font-bold">{stats.loading ? '...' : stats.movimientosHoy}</div>
                 </div>
               </div>
-              <div className="text-sm text-slate-600 mb-2">Movimientos Hoy</div>
-              <div className="text-4xl font-bold text-slate-800 mb-3">{stats.loading ? '...' : stats.movimientosHoy}</div>
+              <div className="text-sm text-slate-600 mb-2">Movimientos Totales</div>
+              <div className="text-4xl font-bold text-slate-800 mb-3">{stats.loading ? '...' : stats.movimientosTotal}</div>
               <div className="text-sm text-slate-600">Actividad del sistema</div>
             </div>
           </div>
@@ -217,7 +279,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2 space-y-8">
             {/* Top Products */}
             <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-8">
-              <h3 className="text-xl font-bold text-slate-800 mb-6">Productos Populares</h3>
+              <h3 className="text-xl font-bold text-slate-800 mb-6">Productos mas vendidos</h3>
               <div className="space-y-4">
                 {stats.productosPopulares.map((producto, i) => (
                   <div key={i} className="flex items-center gap-4">
