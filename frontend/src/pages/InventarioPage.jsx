@@ -15,6 +15,7 @@ export default function InventarioPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const notifiedRef = useRef(new Set());
+  const updatedStateRef = useRef(new Set()); // evita actualizaciones repetidas
 
   // filtros / paginación server-side
   const [search, setSearch] = useState('');
@@ -28,6 +29,44 @@ export default function InventarioPage() {
 
   useEffect(() => { fetchCategorias(); }, []);
   useEffect(() => { fetchProductos(); }, [refreshKey, page, search, categoriaFilter, estadoFilter, minStock, maxStock]);
+
+  // nuevo: sincroniza estado automáticamente según stock (por vencer / agotado / disponible)
+  useEffect(() => {
+    if (!productos || productos.length === 0) return;
+    let hasUpdated = false;
+
+    async function syncEstados() {
+      for (const p of productos) {
+        const id = p.id_producto ?? p.id;
+        if (!id) continue;
+        const stockNum = Number(p.stock ?? 0);
+        const minNum = Number(p.stock_minimo ?? 0);
+
+        // usar el valor que coincide con el ENUM de la BD: 'vencimiento'
+        let desired = 'disponible';
+        if (!isNaN(minNum) && stockNum <= minNum && stockNum > 0) desired = 'vencimiento';
+        if (stockNum <= 0) desired = 'agotado';
+
+        const current = String(p.estado ?? '').toLowerCase();
+        if (current !== desired && !updatedStateRef.current.has(id)) {
+          try {
+            // actualizar solo campo estado (backend acepta 'vencimiento' según schema)
+            await api.put(`/api/productos/${id}`, { estado: desired });
+            updatedStateRef.current.add(id);
+            hasUpdated = true;
+          } catch (err) {
+            console.error('Error actualizando estado producto', id, err);
+          }
+        }
+      }
+
+      if (hasUpdated) {
+        setRefreshKey(k => k + 1);
+      }
+    }
+
+    syncEstados();
+  }, [productos]);
 
   async function fetchCategorias() {
     try {
@@ -386,11 +425,14 @@ export default function InventarioPage() {
                               disponible: 'bg-green-100 text-green-800',
                               agotado: 'bg-red-100 text-red-800',
                               vencimiento: 'bg-yellow-100 text-yellow-800',
+                              'por vencer': 'bg-yellow-100 text-yellow-800' // compatibilidad por si viene así
                             };
                             const cls = badges[estadoKey] || 'bg-gray-100 text-gray-600';
+                            // normalizar texto visible: mostrar "Por vencer" si viene 'vencimiento'
+                            const label = estadoKey === 'vencimiento' ? 'Por vencer' : (p.estado || 'N/A');
                             return (
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cls}`}>
-                                {p.estado || 'N/A'}
+                                {label}
                               </span>
                             );
                           })()}
