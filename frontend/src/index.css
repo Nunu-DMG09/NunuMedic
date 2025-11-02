@@ -1,4 +1,3 @@
-
 @import "tailwindcss";
 
 /* Paleta base: Azul / Rojo / Blanco */
@@ -12,7 +11,11 @@
 }
 
 /* Reset mínimo */
-* { box-sizing: border-box; }
+* { 
+  box-sizing: border-box; 
+  /* Transición suave para todos los elementos */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
 html, body, #root { height: 100%; }
 body {
   margin: 0;
@@ -24,7 +27,7 @@ body {
   line-height: 1.4;
 }
 
-/* Contenedor base */
+/* Contenedor base - SIN TOCAR */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -36,3 +39,108 @@ body {
 .mt-4 { margin-top: 1rem; }
 .mb-6 { margin-bottom: 1.5rem; }
 
+/* ========= TEMA CLARO (POR DEFECTO) ========= */
+html.light {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.light body {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+/* ========= TEMA OSCURO ========= */
+html.dark {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+html.dark body {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+/* Transiciones para elementos específicos en modo oscuro */
+html.dark * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Dark mode para inputs y formularios */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  border-color: #3b82f6;
+  outline-color: #3b82f6;
+}
+
+/* Dark mode para botones */
+html.dark button {
+  color: #f1f5f9;
+}
+
+/* Dark mode para cards y modales */
+html.dark .bg-white {
+  background-color: #1e293b !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-gray-900,
+html.dark .text-gray-800 {
+  color: #f1f5f9 !important;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+  color: #cbd5e1 !important;
+}
+
+/* Dark mode para bordes */
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: #475569 !important;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
