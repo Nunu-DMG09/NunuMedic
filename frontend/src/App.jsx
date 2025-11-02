@@ -11,15 +11,21 @@ import VentasHistorialPage from './pages/VentasHistorialPage';
 import Dashboard from './pages/Dashboard';
 import MovimientosPage from './pages/MovimientosPage';
 import AdminsPage from './pages/AdminsPage';
+import DashboardLayout from './layout/DashboardLayout';
+import { ThemeProvider } from './context/ThemeContext';
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<LoginPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+        <ThemeProvider>
+          <Routes>
+          {/* Ruta de Login sin layout */}
+          <Route path="/" element={<LoginPage />} />
+          
+          {/* Rutas que usan DashboardLayout */}
+          <Route path="/" element={<DashboardLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="inventario" element={<InventarioPage />} />
             <Route path="ventas" element={<VentasPage />} />
             <Route path="ventas/historial" element={<VentasHistorialPage />} />
@@ -27,6 +33,8 @@ export default function App() {
             <Route path="admins" element={<AdminsPage />} />
           </Route>
         </Routes>
+        </ThemeProvider>
+        
       </AuthProvider>
     </BrowserRouter>
   );
