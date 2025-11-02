@@ -3,7 +3,6 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import MainLayout from './layout/MainLayout';
 import LoginPage from './pages/LoginPage';
 import InventarioPage from './pages/InventarioPage';
 import VentasPage from './pages/VentasPage';
