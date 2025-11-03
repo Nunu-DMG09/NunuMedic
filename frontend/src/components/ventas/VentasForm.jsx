@@ -3,7 +3,6 @@ import api from '../../services/api';
 
 export default function VentasForm({ cliente = null }) {
   const [productos, setProductos] = useState([]);
-  const [clients, setClients] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState([]);
@@ -15,18 +14,13 @@ export default function VentasForm({ cliente = null }) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [ventaCreada, setVentaCreada] = useState(null);
 
-  useEffect(() => { fetchProductos(); fetchClientes(); }, []);
+  useEffect(() => { fetchProductos(); }, []);
 
   useEffect(() => {
     if (cliente) {
       const id = cliente.id_cliente ?? cliente.id ?? '';
       setIdCliente(id ? String(id) : '');
       setClienteNombre(`${cliente.nombre ?? ''}${cliente.apellido ? ' ' + cliente.apellido : ''}`);
-      setClients(prev => {
-        const exists = prev.some(c => String(c.id_cliente ?? c.id ?? '') === String(id));
-        if (exists) return prev;
-        return [{ id_cliente: id, nombre: cliente.nombre, apellido: cliente.apellido, dni: cliente.dni ?? '' }, ...prev];
-      });
     }
   }, [cliente]);
 
@@ -52,22 +46,27 @@ export default function VentasForm({ cliente = null }) {
     }
   }
 
-  async function fetchClientes() {
-    try {
-      const res = await api.get('/api/clientes', { validateStatus: false });
-      const data = res.data;
-      let items = Array.isArray(data) ? data : (data?.clientes ?? data?.data ?? data?.rows) ?? [];
-      setClients(Array.isArray(items) ? items : []);
-    } catch (err) {
-      console.error('fetchClientes', err);
-      setClients([]);
-    }
+  function showTempMessage(msg, type = 'error', ms = 4500) {
+    setMessage({ type, text: msg });
+    setTimeout(() => setMessage(null), ms);
   }
 
   function addProductToCart(product) {
+    const stockNum = Number(product.stock ?? 0);
+    if (stockNum <= 0) {
+      showTempMessage(`No se puede agregar "${product.nombre_producto}" — producto agotado`, 'error');
+      return;
+    }
+
     const existing = cart.find(i => i.id_producto === product.id_producto);
     if (existing) {
-      setCart(cart.map(i => i.id_producto === product.id_producto ? { ...i, cantidad: i.cantidad + 1 } : i));
+      // prevent increasing beyond stock
+      const newQty = existing.cantidad + 1;
+      if (newQty > stockNum) {
+        showTempMessage(`No hay suficiente stock de "${product.nombre_producto}" (máx ${stockNum})`, 'error');
+        return;
+      }
+      setCart(cart.map(i => i.id_producto === product.id_producto ? { ...i, cantidad: newQty } : i));
     } else {
       setCart([...cart, { 
         id_producto: product.id_producto, 
@@ -79,7 +78,14 @@ export default function VentasForm({ cliente = null }) {
   }
 
   function updateQty(id_producto, cantidad) {
-    setCart(cart.map(i => i.id_producto === id_producto ? { ...i, cantidad: Math.max(1, Number(cantidad) || 1) } : i));
+    const target = productos.find(p => String(p.id_producto ?? p.id) === String(id_producto));
+    const stockNum = Number(target?.stock ?? 0);
+    const q = Math.max(1, Number(cantidad) || 1);
+    if (stockNum > 0 && q > stockNum) {
+      showTempMessage(`Cantidad superior al stock disponible (${stockNum})`, 'error');
+      return;
+    }
+    setCart(cart.map(i => i.id_producto === id_producto ? { ...i, cantidad: q } : i));
   }
 
   function removeItem(id_producto) {
@@ -92,6 +98,22 @@ export default function VentasForm({ cliente = null }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!cart.length) return setMessage({ type: 'error', text: 'Agrega al menos 1 producto' });
+
+    // validar stock antes de enviar
+    for (const it of cart) {
+      const prod = productos.find(p => String(p.id_producto ?? p.id) === String(it.id_producto));
+      const stockNum = Number(prod?.stock ?? 0);
+      if (!prod) {
+        return setMessage({ type: 'error', text: `Producto no encontrado en catálogo (ID ${it.id_producto})` });
+      }
+      if (stockNum <= 0) {
+        return setMessage({ type: 'error', text: `No se puede vender "${it.nombre_producto}" — producto agotado` });
+      }
+      if (Number(it.cantidad) > stockNum) {
+        return setMessage({ type: 'error', text: `No hay suficiente stock de "${it.nombre_producto}" (disponible: ${stockNum})` });
+      }
+    }
+
     setSubmitting(true);
     setMessage(null);
     try {
@@ -112,12 +134,14 @@ export default function VentasForm({ cliente = null }) {
       });
       setShowSuccessModal(true);
       
-      // Limpiar formulario
+      // Limpiar formulario (mantener cliente para la próxima venta)
       setCart([]);
-      setClienteNombre('');
-      setIdCliente('');
+      // NO limpiar clienteNombre / id_cliente => se conservará para la siguiente venta
       setMetodoPago('efectivo');
       setMessage(null);
+
+      // refrescar productos para actualizar stocks en UI
+      fetchProductos();
     } catch (err) {
       console.error('create venta', err);
       setMessage({ type: 'error', text: err.response?.data?.error || 'Error al crear venta' });
@@ -152,53 +176,41 @@ export default function VentasForm({ cliente = null }) {
                   />
                 </div>
 
-                {/* Products List - Más compacta */}
+                {/* Products List */}
                 <div className="bg-slate-50 rounded-xl border border-slate-200 max-h-64 overflow-y-auto">
                   {loadingProducts ? (
-                    <div className="p-8 text-center text-slate-500">
-                      <svg className="animate-spin w-8 h-8 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                      </svg>
-                      Cargando productos...
-                    </div>
+                    <div className="p-8 text-center text-slate-500">Cargando productos...</div>
                   ) : filtered.length === 0 ? (
                     <div className="p-8 text-center text-slate-500">No se encontraron productos</div>
                   ) : (
-                    filtered.map(p => (
-                      <div key={p.id_producto} className="flex items-center justify-between p-4 border-b border-slate-200 last:border-b-0 hover:bg-white transition-colors">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-slate-800 truncate">{p.nombre_producto}</h4>
-                          <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
-                            <span className="flex items-center gap-1">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
-                              </svg>
-                              S/. {Number(p.precio_venta || 0).toFixed(2)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4a1 1 0 00-1.414-1.414L13 7.586l-1.293-1.293z" clipRule="evenodd"/>
-                              </svg>
-                              Stock: {p.stock}
-                            </span>
+                    filtered.map(p => {
+                      const outOfStock = Number(p.stock ?? 0) <= 0;
+                      return (
+                        <div key={p.id_producto} className="flex items-center justify-between p-4 border-b border-slate-200 last:border-b-0 hover:bg-white transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-slate-800 truncate">{p.nombre_producto}</h4>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
+                              <span className="flex items-center gap-1">S/. {Number(p.precio_venta || 0).toFixed(2)}</span>
+                              <span className="flex items-center gap-1">Stock: {p.stock}</span>
+                            </div>
                           </div>
+                          <button 
+                            type="button" 
+                            onClick={() => addProductToCart(p)}
+                            disabled={outOfStock}
+                            className={`ml-4 px-4 py-2 rounded-lg font-medium transition-colors ${outOfStock ? 'bg-gray-300 text-slate-600 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                          >
+                            {outOfStock ? 'Agotado' : 'Agregar'}
+                          </button>
                         </div>
-                        <button 
-                          type="button" 
-                          onClick={() => addProductToCart(p)}
-                          className="ml-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
-                        >
-                          Agregar
-                        </button>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
             </div>
 
-            {/* RIGHT: CART & DETAILS - Más ancho */}
+            {/* RIGHT: CART & DETAILS */}
             <div className="space-y-6">
               {/* Client & Payment */}
               <div className="space-y-4">
@@ -206,22 +218,9 @@ export default function VentasForm({ cliente = null }) {
                 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Cliente</label>
-                  <select 
-                    value={id_cliente} 
-                    onChange={e => { 
-                      setIdCliente(e.target.value); 
-                      const sel = clients.find(c => String(c.id_cliente) === e.target.value); 
-                      if (sel) setClienteNombre(sel.nombre + (sel.apellido ? ' ' + sel.apellido : '')); 
-                    }}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
-                  >
-                    <option value="">Seleccionar cliente</option>
-                    {clients.map(c => 
-                      <option key={c.id_cliente} value={c.id_cliente}>
-                        {c.nombre} {c.apellido ?? ''}
-                      </option>
-                    )}
-                  </select>
+                  <div className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800">
+                    <div className="font-semibold">{clienteNombre || 'Cliente Anónimo'}</div>
+                  </div>
                 </div>
 
                 <div>
@@ -241,21 +240,11 @@ export default function VentasForm({ cliente = null }) {
 
               {/* Cart */}
               <div className="bg-slate-50 rounded-xl border-2 border-slate-200 p-6">
-                <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
-                  </svg>
-                  Carrito ({cart.length})
-                </h4>
+                <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">Carrito ({cart.length})</h4>
                 
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                   {cart.length === 0 ? (
-                    <div className="text-center py-8 text-slate-500">
-                      <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/>
-                      </svg>
-                      Carrito vacío
-                    </div>
+                    <div className="text-center py-8 text-slate-500">Carrito vacío</div>
                   ) : (
                     cart.map(item => (
                       <div key={item.id_producto} className="bg-white rounded-lg p-4 border border-slate-200">
@@ -266,9 +255,7 @@ export default function VentasForm({ cliente = null }) {
                             onClick={() => removeItem(item.id_producto)}
                             className="text-red-500 hover:text-red-700 p-1"
                           >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
-                            </svg>
+                            ✕
                           </button>
                         </div>
                         
@@ -321,7 +308,7 @@ export default function VentasForm({ cliente = null }) {
                 
                 <button 
                   type="button" 
-                  onClick={() => { setCart([]); setMessage(null); setClienteNombre(''); setIdCliente(''); }}
+                  onClick={() => { setCart([]); setMessage(null); /* mantener cliente */ }}
                   className="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-all duration-200"
                 >
                   Limpiar
@@ -336,20 +323,17 @@ export default function VentasForm({ cliente = null }) {
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
-            {/* Success Icon */}
             <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
               </svg>
             </div>
 
-            {/* Content */}
             <div className="text-center mb-8">
               <h3 className="text-2xl font-bold text-slate-800 mb-2">¡Venta Registrada!</h3>
               <p className="text-slate-600">La venta se ha procesado correctamente</p>
             </div>
 
-            {/* Details */}
             <div className="bg-slate-50 rounded-xl p-6 mb-6 space-y-3">
               <div className="flex justify-between">
                 <span className="text-slate-600">ID de Venta:</span>
@@ -369,21 +353,26 @@ export default function VentasForm({ cliente = null }) {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-3">
               <button 
-                onClick={() => setShowSuccessModal(false)}
+                onClick={() => {
+                  // preparar nueva venta pero mantener cliente seleccionado
+                  setShowSuccessModal(false);
+                  setVentaCreada(null);
+                  setCart([]);
+                  setMessage(null);
+                }}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200"
               >
                 Nueva Venta
               </button>
-              <button 
-                onClick={() => setShowSuccessModal(false)}
-                className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-all duration-200"
-              >
-                Cerrar
-              </button>
-            </div>
+               <button 
+                 onClick={() => setShowSuccessModal(false)}
+                 className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-all duration-200"
+               >
+                 Cerrar
+               </button>
+             </div>
           </div>
         </div>
       )}
