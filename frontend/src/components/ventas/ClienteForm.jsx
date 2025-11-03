@@ -7,6 +7,9 @@ export default function ClienteForm({ onCreated }) {
   const [apellido, setApellido] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [checking, setChecking] = useState(false);
+  const [checkMessage, setCheckMessage] = useState(''); // mensaje de verificación (existe/no existe)
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!dni || !nombre || !apellido) return alert('DNI, nombre y apellido son requeridos');
@@ -44,6 +47,47 @@ export default function ClienteForm({ onCreated }) {
     }
   }
 
+  // Verificar por DNI sin crear: si existe, rellenar campos y continuar (onCreated)
+  async function handleVerifyDni() {
+    if (!dni) return setCheckMessage('Ingresa un DNI para verificar');
+    setChecking(true);
+    setCheckMessage('');
+    try {
+      // Intentar endpoint con query param (si existe), si no, fallback a listar
+      let found = null;
+      try {
+        const res = await api.get('/api/clientes', { params: { dni }, validateStatus: false });
+        const list = Array.isArray(res.data) ? res.data : (res.data?.data ?? res.data?.clientes ?? []);
+        found = (list || []).find(c => String(c.dni) === String(dni));
+      } catch (err) {
+        console.warn('Error buscando por DNI (query), se listará todo', err);
+      }
+
+      // fallback: obtener lista completa si no se obtuvo resultado
+      if (!found) {
+        const resAll = await api.get('/api/clientes', { validateStatus: false });
+        const listAll = Array.isArray(resAll.data) ? resAll.data : (resAll.data?.data ?? resAll.data?.clientes ?? []);
+        found = (listAll || []).find(c => String(c.dni) === String(dni));
+      }
+
+      if (found) {
+        // rellenar campos visibles
+        setNombre(found.nombre ?? found.nombres ?? '');
+        setApellido(found.apellido ?? found.apellidos ?? '');
+        setCheckMessage(`Cliente encontrado: ${found.nombre ?? ''} ${found.apellido ?? ''}`);
+        // notificar al padre para continuar la venta
+        if (typeof onCreated === 'function') onCreated(found);
+      } else {
+        setCheckMessage('No existe un cliente con ese DNI. Debes registrarlo.');
+      }
+    } catch (err) {
+      console.error('Error verificando DNI', err);
+      setCheckMessage('Error verificando DNI');
+    } finally {
+      setChecking(false);
+    }
+  }
+
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-10 relative overflow-hidden">
       {/* Decorative elements */}
@@ -77,12 +121,23 @@ export default function ClienteForm({ onCreated }) {
                 <input 
                   type="text"
                   value={dni} 
-                  onChange={e => setDni(e.target.value)} 
+                  onChange={e => { setDni(e.target.value); setCheckMessage(''); }}
                   maxLength={8}
                   placeholder="Ingresa el DNI (8 dígitos)"
-                  className="w-full pl-12 pr-4 py-4 border-2 border-slate-200 rounded-xl bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
+                  className="w-full pl-12 pr-28 py-4 border-2 border-slate-200 rounded-xl bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
                 />
+                <div className="absolute inset-y-0 right-2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleVerifyDni}
+                    disabled={checking || !dni}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {checking ? 'Verificando...' : 'Verificar'}
+                  </button>
+                </div>
               </div>
+              {checkMessage && <div className="mt-2 text-sm text-slate-600">{checkMessage}</div>}
             </div>
 
             <div>
