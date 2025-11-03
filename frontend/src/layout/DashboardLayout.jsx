@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import useAuth from '../hooks/useAuth';
 
 const Icon = {
@@ -13,6 +14,66 @@ const Icon = {
 };
 
 export default function DashboardLayout() {
+  // notificaciones de stock bajo
+  const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unseenCount, setUnseenCount] = useState(0); // contador de notificaciones nuevas
+  const acknowledgedRef = useRef(new Set());
+  const pollingRef = useRef(null);
+  const prevLowIdsRef = useRef(new Set()); // para detectar nuevos ítems entre polls
+
+  const fetchLowStock = async () => {
+    try {
+      // traer muchos registros y filtrar en cliente (si tienes endpoint específico usa ese)
+      const res = await api.get('/api/productos/paginar', { params: { page: 1, perPage: 1000 } });
+      const payload = res.data ?? {};
+      const items = Array.isArray(payload.items) ? payload.items : (Array.isArray(payload.data) ? payload.data : []);
+      const low = items.filter(p => {
+        const stockNum = Number(p.stock ?? 0);
+        const minNum = Number(p.stock_minimo ?? 0);
+        return !isNaN(minNum) && stockNum <= minNum;
+      });
+
+      // detectar nuevos productos que han llegado al mínimo desde la última verificación
+      const lowIds = new Set(low.map(p => String(p.id_producto ?? p.id ?? p.idProducto ?? '')));
+      const prevIds = prevLowIdsRef.current || new Set();
+      const newly = Array.from(lowIds).filter(id => id && !prevIds.has(id));
+      if (newly.length > 0) {
+        // aumentar unseenCount automáticamente (sin recargar)
+        setUnseenCount(c => c + newly.length);
+      }
+      prevLowIdsRef.current = lowIds;
+
+      setLowStockProducts(low);
+    } catch (e) {
+      console.error('Error fetching low stock products', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchLowStock();
+    // poll cada 60s
+    pollingRef.current = setInterval(fetchLowStock, 60000);
+    return () => clearInterval(pollingRef.current);
+  }, []);
+
+   const toggleNotifications = () => setShowNotifications(s => !s);
+   const acknowledgeProduct = (id) => {
+    const sid = String(id);
+    if (!acknowledgedRef.current.has(sid)) {
+      acknowledgedRef.current.add(sid);
+      // decrementar contador unseen si estaba sin leer
+      setUnseenCount(c => Math.max(0, c - 1));
+      // forzar re-render actualizando estado (copia vacía)
+      setLowStockProducts(prev => prev.slice());
+    }
+   };
+   const handleGoToInventario = (id) => {
+     // opcional: navegar a inventario y/o abrir modal para producto
+     navigate('/inventario');
+     setShowNotifications(false);
+   };
+
   const menuItems = [
     { to: '/dashboard', icon: Icon.Dashboard, label: 'Dashboard' },
     { to: '/ventas', icon: Icon.Sales, label: 'Ventas' },
@@ -113,15 +174,81 @@ export default function DashboardLayout() {
             </div>
             
             <div className="flex items-center gap-6">
-              {/* Notifications */}
+              {/* Notifications (low stock) */}
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2L13 8l6 1-4.5 4.5L16 20l-6-3-6 3 1.5-6.5L1 9l6-1 3-6z"/>
+                <button
+                  onClick={toggleNotifications}
+                  className="relative w-12 h-12 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
+                  aria-label="Notificaciones de stock"
+                  title="Notificaciones de stock"
+                >
+                  {/* Icono de campana */}
+                  <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v0.68C7.64 5.36 6 7.93 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h11z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                </div>
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">3</div>
-              </div>
+                   {unseenCount > 0 && (
+                     <span className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 rounded-full bg-red-600 text-white text-xs flex items-center justify-center">
+                       {unseenCount}
+                     </span>
+                   )}
+                 </button>
+
+                 {showNotifications && (
+                   <div className="absolute right-0 mt-3 w-80 bg-white rounded-lg shadow-xl border border-slate-200 z-50">
+                     <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+                       <div className="font-semibold">Alertas de stock</div>
+                       <button
+                         onClick={() => {
+                           // marcar todas las actuales como vistas
+                           (lowStockProducts || []).forEach(p => acknowledgedRef.current.add(String(p.id_producto ?? p.id)));
+                           setUnseenCount(0);
+                           setShowNotifications(false);
+                         }}
+                         className="text-sm text-slate-500 hover:text-slate-700"
+                       >
+                         Marcar todas como vistas
+                       </button>
+                     </div>
+                     <div className="max-h-64 overflow-auto">
+                       {lowStockProducts.length === 0 ? (
+                         <div className="p-4 text-sm text-slate-500">No hay productos con stock en o por debajo del mínimo.</div>
+                       ) : (
+                         lowStockProducts.map(p => {
+                           const id = p.id_producto ?? p.id ?? String(p._id ?? '');
+                           const name = p.nombre || p.nombre_producto || p.nombreProducto || 'Sin nombre';
+                           const seen = acknowledgedRef.current.has(String(id));
+                           // mostrar nombre explícitamente; reemplazar icono por iniciales
+                           const initials = name.split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+                           return (
+                             <div key={id} className="p-3 flex items-center justify-between hover:bg-slate-50">
+                               <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 bg-slate-100 rounded-md flex items-center justify-center">
+                                   <span className="text-slate-600 font-semibold text-sm">{initials}</span>
+                                 </div>
+                                 <div>
+                                   <div className="text-sm font-semibold text-slate-800">{name}</div>
+                                   <div className="text-xs text-slate-500">Stock: <span className="font-medium text-slate-700">{p.stock}</span> • Mínimo: {p.stock_minimo}</div>
+                                 </div>
+                               </div>
+                               <div className="flex flex-col items-end gap-2">
+                                 {!seen ? <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Nuevo</span> : <span className="text-xs text-slate-400">Visto</span>}
+                                 <div className="flex gap-2">
+                                   <button onClick={() => { acknowledgeProduct(id); }} className="px-2 py-1 text-xs bg-slate-100 rounded hover:bg-slate-200">Marcar</button>
+                                   <button onClick={() => handleGoToInventario(id)} className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">Ver</button>
+                                 </div>
+                               </div>
+                             </div>
+                           );
+                         })
+                       )}
+                     </div>
+                     <div className="p-3 border-t border-slate-100 text-xs text-slate-500">
+                       Última actualización automática cada 60s.
+                     </div>
+                   </div>
+                 )}
+               </div>
               
               {/* Botón abrir modal logout */}
               <button
@@ -170,6 +297,67 @@ export default function DashboardLayout() {
                 className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition flex items-center gap-2"
               >
                 {loggingOut ? 'Cerrando...' : 'Cerrar sesión'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Low Stock Notifications */}
+      {showNotifications && lowStockProducts.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={toggleNotifications} />
+          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold mb-4">Productos con stock bajo</h3>
+            <div className="max-h-60 overflow-y-auto mb-4">
+              {lowStockProducts.map(product => {
+                const id = product.id_producto ?? product.id ?? String(product._id ?? '');
+                const name = product.nombre || product.nombre_producto || product.nombreProducto || 'Sin nombre';
+                const initials = name.split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+                return (
+                  <div key={id} className="flex items-center justify-between py-2 border-b border-slate-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-100 rounded-md flex items-center justify-center">
+                        <span className="text-slate-600 font-semibold text-sm">{initials}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-slate-800 font-semibold">{name}</span>
+                        <span className="text-slate-500 text-sm">{`Stock: ${product.stock} • Mínimo: ${product.stock_minimo}`}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => { acknowledgeProduct(id); }}
+                        className="px-3 py-1 rounded-md bg-slate-100 text-slate-700 text-sm hover:bg-slate-200 transition"
+                      >
+                        Marcar
+                      </button>
+                      <button
+                        onClick={() => handleGoToInventario(id)}
+                        className="px-3 py-1 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
+                      >
+                        Ir a inventario
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={toggleNotifications}
+                className="px-4 py-2 rounded-md bg-gray-100 text-slate-700 hover:bg-gray-200 transition"
+              >
+                Ignorar
+              </button>
+              <button
+                onClick={() => {
+                  lowStockProducts.forEach(product => acknowledgeProduct(product.id_producto ?? product.id));
+                  toggleNotifications();
+                }}
+                className="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 transition"
+              >
+                Marcar como visto
               </button>
             </div>
           </div>
