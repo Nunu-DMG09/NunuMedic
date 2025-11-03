@@ -321,19 +321,19 @@ export default function InventarioPage() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto">
+            <div className="bg-slate-50 rounded-xl border-2 border-slate-200 overflow-hidden">
               <table className="w-full">
-                <thead className="bg-slate-100 border-b border-slate-200">
+                <thead className="bg-gradient-to-r from-slate-800 to-slate-700">
                   <tr>
-                    <th className="text-left py-4 px-6 font-semibold text-slate-700 text-sm">ID</th>
-                    <th className="text-left py-4 px-6 font-semibold text-slate-700 text-sm">Producto</th>
-                    <th className="text-left py-4 px-6 font-semibold text-slate-700 text-sm">Categoría</th>
-                    <th className="text-right py-4 px-6 font-semibold text-slate-700 text-sm">Precio</th>
-                    <th className="text-center py-4 px-6 font-semibold text-slate-700 text-sm">Stock</th>
-                    <th className="text-center py-4 px-6 font-semibold text-slate-700 text-sm">Stock Mín.</th>
-                    <th className="text-center py-4 px-6 font-semibold text-slate-700 text-sm">Vencimiento</th>
-                    <th className="text-center py-4 px-6 font-semibold text-slate-700 text-sm">Estado</th>
-                    <th className="text-center py-4 px-6 font-semibold text-slate-700 text-sm">Acciones</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">ID</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Producto</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Categoría</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Precio</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Stock</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Stock Mín.</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Vencimiento</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Estado</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
