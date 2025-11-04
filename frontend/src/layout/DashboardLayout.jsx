@@ -22,6 +22,9 @@ export default function DashboardLayout() {
   const pollingRef = useRef(null);
   const prevLowIdsRef = useRef(new Set()); // para detectar nuevos ítems entre polls
 
+  // estado para controlar sidebar (colapsado / expandido)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   const fetchLowStock = async () => {
     try {
       // traer muchos registros y filtrar en cliente (si tienes endpoint específico usa ese)
