@@ -181,7 +181,7 @@ export default function InventarioPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-8">
         <InventarioHeader />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-8 pb-20 sm:pb-8">
