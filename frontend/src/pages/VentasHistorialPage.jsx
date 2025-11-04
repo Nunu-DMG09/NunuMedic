@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import VentasHeader from '../components/inventario/VentasHeader';
 
 export default function VentasHistorialPage() {
@@ -80,57 +80,102 @@ export default function VentasHistorialPage() {
   const paginatedVentas = filteredVentas.slice((page - 1) * perPage, page * perPage);
 
   function exportSalePdf(venta) {
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text(`Venta #${venta.id_venta}`, 14, 18);
-    doc.setFontSize(10);
-    doc.text(`Fecha: ${venta.fecha || ''}`, 14, 26);
-    const cliente = (venta.cliente_nombre ? `${venta.cliente_nombre} ${venta.cliente_apellido || ''}` : 'Cliente genérico');
-    doc.text(`Cliente: ${cliente}`, 14, 32);
-    doc.autoTable({
-      startY: 40,
-      head: [['ID', 'Producto', 'Cantidad', 'P.Unit', 'Subtotal']],
-      body: (venta.items || []).map(it => [
-        it.id_producto,
-        it.nombre_producto || '-',
-        it.cantidad,
-        Number(it.precio_unitario).toFixed(2),
-        (Number(it.cantidad) * Number(it.precio_unitario)).toFixed(2)
-      ]),
-      styles: { fontSize: 9 }
-    });
-    const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : 80;
-    doc.setFontSize(12);
-    doc.text(`Total: S/. ${Number(venta.total).toFixed(2)}`, 14, finalY);
-    doc.save(`venta_${venta.id_venta}.pdf`);
+    try {
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+
+      const margin = 40;
+      const startY = 80;
+      doc.setFontSize(16);
+      doc.text(`NUNUMEDIC — Venta #${venta?.id_venta ?? ''}`, margin, 40);
+      doc.setFontSize(10);
+      doc.text(`Fecha: ${venta?.fecha ?? ''}`, margin, 56);
+      const cliente = (venta?.cliente_nombre ? `${venta.cliente_nombre} ${venta.cliente_apellido ?? ''}` : 'Cliente genérico');
+      doc.text(`Cliente: ${cliente}`, margin, 72);
+
+      const rows = (venta?.items || []).map((it, i) => {
+        const cantidad = Number(it?.cantidad ?? 0) || 0;
+        const unit = Number(it?.precio_unitario ?? it?.precio ?? it?.precio_venta ?? 0) || 0;
+        const subtotal = cantidad * unit;
+        return [
+          it?.id_producto ?? (i + 1),
+          it?.nombre_producto || it?.producto_nombre || '-',
+          cantidad,
+          unit.toFixed(2),
+          subtotal.toFixed(2)
+        ];
+      });
+
+      // usar autoTable pasando la instancia doc
+      autoTable(doc, {
+        startY,
+        head: [['ID', 'Producto', 'Cant', 'P.Unit', 'Subtotal']],
+        body: rows,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [30, 64, 175], textColor: 255 },
+        margin: { left: margin, right: margin }
+      });
+
+      const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : startY + 120;
+      doc.setFontSize(12);
+      doc.text(`Total: S/. ${Number(venta?.total ?? 0).toFixed(2)}`, margin, finalY);
+
+      doc.save(`venta_${venta?.id_venta ?? Date.now()}.pdf`);
+    } catch (err) {
+      console.error('Error exportando venta a PDF:', err);
+      alert('Error al exportar PDF. Revisa la consola para más detalles.');
+    }
   }
 
   function exportAllPdf() {
-    if (!ventas || ventas.length === 0) return alert('No hay ventas para exportar');
-    const source = filteredVentas && filteredVentas.length ? filteredVentas : ventas;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Historial de Ventas', 14, 18);
-    let cursorY = 26;
-    source.forEach((v, idx) => {
-      doc.setFontSize(11);
-      doc.text(`Venta #${v.id_venta} — Fecha: ${v.fecha || ''} — Total: S/. ${Number(v.total).toFixed(2)}`, 14, cursorY);
-      cursorY += 6;
-      const rows = (v.items || []).map(it => [
-        it.id_producto, it.nombre_producto || '-', it.cantidad, Number(it.precio_unitario).toFixed(2),
-        (Number(it.cantidad) * Number(it.precio_unitario)).toFixed(2)
-      ]);
-      doc.autoTable({
-        startY: cursorY,
-        head: [['ID','Producto','Cant','P.Unit','Subtotal']],
-        body: rows,
-        styles: { fontSize: 8 },
-        margin: { left: 14, right: 14 }
-      });
-      cursorY = doc.lastAutoTable.finalY + 8;
-      if (idx < source.length - 1 && cursorY > 240) { doc.addPage(); cursorY = 20; }
-    });
-    doc.save('historial_ventas.pdf');
+    try {
+      const source = (filteredVentas && filteredVentas.length) ? filteredVentas : ventas;
+      if (!source || source.length === 0) return alert('No hay ventas para exportar');
+
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+
+      const margin = 40;
+      let cursorY = 50;
+      doc.setFontSize(18);
+      doc.text('Historial de Ventas — NUNUMEDIC', margin, cursorY);
+      cursorY += 22;
+
+      for (let idx = 0; idx < source.length; idx++) {
+        const v = source[idx];
+        doc.setFontSize(11);
+        const header = `Venta #${v?.id_venta ?? ''} — ${v?.fecha ?? ''} — Total: S/. ${Number(v?.total ?? 0).toFixed(2)}`;
+        doc.text(header, margin, cursorY);
+        cursorY += 12;
+
+        const rows = (v?.items || []).map((it, i) => [
+          it?.id_producto ?? i + 1,
+          it?.nombre_producto || '-',
+          Number(it?.cantidad ?? 0),
+          (Number(it?.precio_unitario ?? it?.precio ?? 0)).toFixed(2),
+          (Number(it?.cantidad ?? 0) * Number(it?.precio_unitario ?? it?.precio ?? 0)).toFixed(2)
+        ]);
+
+        autoTable(doc, {
+          startY: cursorY,
+          head: [['ID','Producto','Cant','P.Unit','Subtotal']],
+          body: rows,
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [75, 85, 99], textColor: 255 },
+          margin: { left: margin, right: margin }
+        });
+
+        cursorY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 18 : cursorY + 80;
+
+        if (idx < source.length - 1 && cursorY > 720) {
+          doc.addPage();
+          cursorY = 40;
+        }
+      }
+
+      doc.save(`historial_ventas_${Date.now()}.pdf`);
+    } catch (err) {
+      console.error('Error exportando historial a PDF:', err);
+      alert('Error al exportar historial. Revisa la consola para más detalles.');
+    }
   }
 
   // Calcular estadísticas
