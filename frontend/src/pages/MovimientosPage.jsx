@@ -1,3 +1,4 @@
+// ...existing code...
 import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import FilterPagination from '../components/inventario/FilterPagination';
@@ -101,99 +102,95 @@ export default function MovimientosPage() {
   const tipoOptions = ['entrada', 'salida'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
         <MovimientosHeader />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-green-100 rounded-full -translate-y-10 translate-x-10 opacity-50"></div>
-            <div className="relative">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd"/>
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-sm text-slate-600">Total Entradas</div>
-                  <div className="text-2xl font-bold text-slate-800">
-                    {allMovimientos.filter(m => m.tipo === 'entrada').length}
-                  </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-full -translate-y-8 translate-x-8 opacity-40 hidden sm:block"></div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm text-slate-600">Total Entradas</div>
+                <div className="text-lg sm:text-2xl font-bold text-slate-800">
+                  {allMovimientos.filter(m => m.tipo === 'entrada').length}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-red-100 rounded-full -translate-y-10 translate-x-10 opacity-50"></div>
-            <div className="relative">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-red-500 to-rose-600 rounded-xl">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 6.414V10a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd"/>
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-sm text-slate-600">Total Salidas</div>
-                  <div className="text-2xl font-bold text-slate-800">
-                    {allMovimientos.filter(m => m.tipo === 'salida').length}
-                  </div>
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-red-100 rounded-full -translate-y-8 translate-x-8 opacity-40 hidden sm:block"></div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-red-500 to-rose-600 rounded-xl">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 6.414V10a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm text-slate-600">Total Salidas</div>
+                <div className="text-lg sm:text-2xl font-bold text-slate-800">
+                  {allMovimientos.filter(m => m.tipo === 'salida').length}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full -translate-y-10 translate-x-10 opacity-50"></div>
-            <div className="relative">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6z" clipRule="evenodd"/>
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-sm text-slate-600">Total Movimientos</div>
-                  <div className="text-2xl font-bold text-slate-800">{allMovimientos.length}</div>
-                </div>
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-full -translate-y-8 translate-x-8 opacity-40 hidden sm:block"></div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm text-slate-600">Total Movimientos</div>
+                <div className="text-lg sm:text-2xl font-bold text-slate-800">{allMovimientos.length}</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-8">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h3 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+              <h3 className="text-lg sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
                 <div className="p-2 bg-slate-100 rounded-lg">
-                  <svg className="w-6 h-6 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6z" clipRule="evenodd"/>
                   </svg>
                 </div>
                 Registro de Movimientos
               </h3>
-              <div className="text-slate-600 mt-2">
+              <div className="text-slate-600 mt-1 text-sm">
                 Mostrando <span className="font-semibold">{movimientos.length}</span> de <span className="font-semibold">{totalItems}</span> movimientos
               </div>
             </div>
-            
-            <button 
-              onClick={() => setRefreshKey(k => k + 1)} 
-              className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-            >
-              <svg className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd"/>
-              </svg>
-              {loading ? 'Actualizando...' : 'Actualizar'}
-            </button>
+
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button 
+                onClick={() => setRefreshKey(k => k + 1)} 
+                className="flex-1 sm:flex-none px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 transition"
+              >
+                <svg className={`w-4 h-4 inline ${loading ? 'animate-spin' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd"/>
+                </svg>
+                <span className="ml-2">{loading ? 'Actualizando...' : 'Actualizar'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Filters */}
-          <div className="mb-8">
+          <div className="mb-6">
             <FilterPagination
               search={search}
               onSearchChange={val => { setSearch(val); setPage(1); }}
@@ -219,8 +216,8 @@ export default function MovimientosPage() {
             />
           </div>
 
-          {/* Table */}
-          <div className="bg-slate-50 rounded-xl border-2 border-slate-200 overflow-hidden">
+          {/* Table for desktop */}
+          <div className="hidden sm:block bg-slate-50 rounded-xl border-2 border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-gradient-to-r from-slate-800 to-slate-700">
@@ -274,20 +271,7 @@ export default function MovimientosPage() {
                           <div className="font-semibold text-slate-800">{m.nombre_producto ?? m.producto_nombre ?? '-'}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                            m.tipo === 'entrada' 
-                              ? 'bg-green-100 text-green-800 border border-green-200' 
-                              : 'bg-red-100 text-red-800 border border-red-200'
-                          }`}>
-                            {m.tipo === 'entrada' ? (
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd"/>
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm3.707 8.293l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 10.586V7a1 1 0 112 0v3.586l1.293-1.293a1 1 0 011.414 1.414z" clipRule="evenodd"/>
-                              </svg>
-                            )}
+                          <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${m.tipo === 'entrada' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
                             {m.tipo}
                           </span>
                         </td>
@@ -300,11 +284,7 @@ export default function MovimientosPage() {
                         <td className="px-6 py-4">
                           <div className="text-slate-600">
                             {m.fecha_movimiento ? new Date(m.fecha_movimiento).toLocaleString('es-PE', {
-                              day: '2-digit',
-                              month: '2-digit', 
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
+                              day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                             }) : '-'}
                           </div>
                         </td>
@@ -316,37 +296,77 @@ export default function MovimientosPage() {
             </div>
           </div>
 
+          {/* Mobile: list cards */}
+          <div className="sm:hidden divide-y divide-slate-200 bg-white rounded-md">
+            {loading ? (
+              <div className="p-6 text-center text-slate-500">Cargando movimientos...</div>
+            ) : movimientos.length === 0 ? (
+              <div className="p-6 text-center text-slate-500">No hay movimientos</div>
+            ) : movimientos.map(m => (
+              <div key={m.id_movimiento} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="font-semibold text-slate-800 truncate">{m.nombre_producto ?? m.producto_nombre ?? '-'}</div>
+                      <div className="text-xs text-slate-500">#{m.id_movimiento}</div>
+                    </div>
+                    <div className="mt-2 text-sm text-slate-600">{m.descripcion ?? '-'}</div>
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${m.tipo === 'entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {m.tipo}
+                      </span>
+                      <span className="text-xs text-slate-500">Cant: <span className="font-semibold">{m.cantidad}</span></span>
+                      <span className="text-xs text-slate-500">{m.fecha_movimiento ? new Date(m.fecha_movimiento).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="text-sm font-bold text-slate-800">S/.</div>
+                    <div className="text-xs text-slate-500">—</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Pagination Footer */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-200">
-            <div className="text-slate-600">
-              Página <span className="font-semibold">{page}</span> de <span className="font-semibold">{totalPages}</span> — 
-              Total: <span className="font-semibold">{totalItems}</span> registros
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-6 pt-4 border-t border-slate-200">
+            <div className="text-slate-600 text-sm">
+              Página <span className="font-semibold">{page}</span> de <span className="font-semibold">{totalPages}</span> — Total: <span className="font-semibold">{totalItems}</span> registros
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <button 
                 onClick={() => setPage(p => Math.max(1, p - 1))} 
                 disabled={page === 1} 
-                className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 text-slate-700 disabled:text-slate-400 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-none px-3 py-2 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 text-slate-700 disabled:text-slate-400 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
               >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd"/>
-                </svg>
                 Anterior
               </button>
+              <span className="px-3 py-2 bg-white border border-slate-200 rounded-lg font-medium">{page}</span>
               <button 
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
                 disabled={page === totalPages} 
-                className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 text-slate-700 disabled:text-slate-400 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-none px-3 py-2 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 text-slate-700 disabled:text-slate-400 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
               >
                 Siguiente
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"/>
-                </svg>
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Mobile quick bar */}
+        <div className="fixed bottom-4 left-0 right-0 z-40 px-4 sm:hidden">
+          <div className="max-w-3xl mx-auto bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl p-3 flex gap-3">
+            <button onClick={() => setRefreshKey(k => k + 1)} className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold">Actualizar</button>
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M6 15l6-6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
 }
+// ...existing code...
