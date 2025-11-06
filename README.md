@@ -206,11 +206,18 @@ El sistema está completamente optimizado para:
 ### Variables de Entorno Requeridas
 ```env
 # Base de datos
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=password
-DB_NAME=nunumed
+#DB_HOST=localhost
+#DB_USER=root
+#DB_PASSWORD='tu contraseña de base de datos'
+#DB_NAME='tu base de datos'
+#PORT=4000
+#SMTP_HOST=smtp.gmail.com
+#SMTP_USER= 'tu gmail'
+#SMTP_PASSWORD= 'tu contraseña de aplicación gmail'
+#SMTP_PORT=587
+#SMTP_SECURE=false
+#ALERT_EMAIL_TO= 'tu gmail'
+#VITE_FRONTEND_URL=http://localhost:5173
 
 # Servidor
 PORT=4000
