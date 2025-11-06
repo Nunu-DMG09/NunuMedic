@@ -19,10 +19,10 @@ export default function App() {
       <AuthProvider>
         <ThemeProvider>
           <Routes>
-          {/* Ruta de Login sin layout */}
+        
           <Route path="/" element={<LoginPage />} />
           
-          {/* Rutas que usan DashboardLayout */}
+        
           <Route path="/" element={<DashboardLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="inventario" element={<InventarioPage />} />

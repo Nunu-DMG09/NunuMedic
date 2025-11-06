@@ -1,4 +1,4 @@
-// ...existing code...
+
 import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import AdminsHeader from '../components/admin/AdminsHeader';
@@ -287,7 +287,7 @@ export default function AdminsPage() {
             </table>
           </div>
 
-          {/* Mobile: cards */}
+        
           <div className="sm:hidden divide-y divide-slate-200">
             {loading ? (
               <div className="p-6 text-center text-slate-500">Cargando administradores...</div>
@@ -367,4 +367,3 @@ export default function AdminsPage() {
     </div>
   );
 }
-// ...existing code...
