@@ -1,4 +1,4 @@
-// ...existing code...
+
 import React from 'react';
 
 export default function Modal({ children, onClose, title }) {
@@ -9,10 +9,10 @@ export default function Modal({ children, onClose, title }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
     >
-      {/* Backdrop */}
+     
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      {/* Modal card: full screen on xs, centered max width on sm+ */}
+      
       <div
         className="relative z-10 w-full h-full sm:h-auto max-w-full sm:max-w-4xl bg-white rounded-none sm:rounded-2xl shadow-2xl border border-slate-200/50 overflow-y-auto"
         role="document"
@@ -20,7 +20,7 @@ export default function Modal({ children, onClose, title }) {
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-indigo-900 px-4 sm:px-8 py-4 sm:py-6 relative">
-          {/* Decorative elements hidden on mobile to keep header compact */}
+         
           <div className="hidden sm:block absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -translate-y-16 translate-x-16"></div>
           <div className="relative flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -48,7 +48,7 @@ export default function Modal({ children, onClose, title }) {
           </div>
         </div>
 
-        {/* Content */}
+       
         <div className="p-4 sm:p-8 bg-gradient-to-b from-white to-slate-50 max-h-[80vh] sm:max-h-[70vh] overflow-y-auto">
           {children}
         </div>
@@ -56,4 +56,3 @@ export default function Modal({ children, onClose, title }) {
     </div>
   );
 }
-// ...existing code...
