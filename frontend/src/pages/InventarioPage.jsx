@@ -1,4 +1,4 @@
-// ...existing code...
+
 import React, { useState, useEffect, useRef } from 'react';
 import ProductoForm from '../components/inventario/ProductoForm';
 import Modal from '../components/inventario/Modal';
@@ -16,7 +16,7 @@ export default function InventarioPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const notifiedRef = useRef(new Set());
-  const updatedStateRef = useRef(new Set()); // evita actualizaciones repetidas
+  const updatedStateRef = useRef(new Set()); 
 
   // filtros / paginación server-side
   const [search, setSearch] = useState('');
@@ -31,7 +31,7 @@ export default function InventarioPage() {
   useEffect(() => { fetchCategorias(); }, []);
   useEffect(() => { fetchProductos(); }, [refreshKey, page, search, categoriaFilter, estadoFilter, minStock, maxStock]);
 
-  // nuevo: sincroniza estado automáticamente según stock (por vencer / agotado / disponible)
+  
   useEffect(() => {
     if (!productos || productos.length === 0) return;
     let hasUpdated = false;
@@ -51,7 +51,7 @@ export default function InventarioPage() {
         const current = String(p.estado ?? '').toLowerCase();
         if (current !== desired && !updatedStateRef.current.has(id)) {
           try {
-            // actualizar solo campo estado (backend acepta 'vencimiento' según schema)
+         
             await api.put(`/api/productos/${id}`, { estado: desired });
             updatedStateRef.current.add(id);
             hasUpdated = true;
@@ -142,7 +142,7 @@ export default function InventarioPage() {
     }
   }
 
-  // notify backend once per product on current page when stock <= stock_minimo
+  
   useEffect(() => {
     if (!productos || productos.length === 0) return;
     async function notifyLow() {
@@ -256,7 +256,7 @@ export default function InventarioPage() {
             </div>
           </div>
 
-          {/* Main Content */}
+     
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 overflow-hidden">
             {/* Header */}
             <div className="p-4 sm:p-8 border-b border-slate-200 bg-gradient-to-r from-white to-slate-50">
@@ -299,7 +299,7 @@ export default function InventarioPage() {
               </div>
             </div>
 
-            {/* Filters */}
+           
             <div className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50">
               <FilterPagination
                 search={search}
@@ -320,7 +320,7 @@ export default function InventarioPage() {
               />
             </div>
 
-            {/* Table (desktop) */}
+        
             <div className="hidden sm:block bg-slate-50 rounded-xl border-2 border-slate-200 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-slate-800 to-slate-700">
@@ -501,7 +501,7 @@ export default function InventarioPage() {
               })}
             </div>
 
-            {/* Footer */}
+            
             <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-200">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="text-sm text-slate-600">Mostrando {productos.length} de {totalItems} productos • Página {page} de {totalPages}</div>
@@ -539,7 +539,7 @@ export default function InventarioPage() {
           </div>
         </div>
 
-        {/* MODALS */}
+        
         {showModal && (
           <Modal title="Agregar Nuevo Producto" onClose={() => setShowModal(false)}>
             <ProductoForm onCreated={handleCreated} onClose={() => setShowModal(false)} />
@@ -552,7 +552,7 @@ export default function InventarioPage() {
           </Modal>
         )}
 
-        {/* SUCCESS MODAL */}
+      
         {showSuccessModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 relative">
@@ -578,4 +578,3 @@ export default function InventarioPage() {
     </>
   );
 }
-// ...existing code...

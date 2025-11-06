@@ -1,4 +1,4 @@
-// ...existing code...
+
 import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import FilterPagination from '../components/inventario/FilterPagination';
@@ -10,7 +10,7 @@ export default function MovimientosPage() {
   const [loading, setLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // filtros y paginación
+ 
   const [search, setSearch] = useState('');
   const [tipo, setTipo] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -41,7 +41,7 @@ export default function MovimientosPage() {
     }
   }
 
-  // filtro memoizado
+  
   const filtered = useMemo(() => {
     if (!allMovimientos || allMovimientos.length === 0) return [];
 
@@ -77,7 +77,7 @@ export default function MovimientosPage() {
     });
   }, [allMovimientos, search, tipo, dateFrom, dateTo]);
 
-  // aplicar paginación
+  
   useEffect(() => {
     const total = filtered.length;
     setTotalItems(total);
@@ -106,7 +106,7 @@ export default function MovimientosPage() {
       <div className="max-w-7xl mx-auto">
         <MovimientosHeader />
 
-        {/* Stats Cards */}
+       
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-full -translate-y-8 translate-x-8 opacity-40 hidden sm:block"></div>
@@ -158,7 +158,7 @@ export default function MovimientosPage() {
           </div>
         </div>
 
-        {/* Main Content */}
+        
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-8">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
@@ -189,7 +189,7 @@ export default function MovimientosPage() {
             </div>
           </div>
 
-          {/* Filters */}
+          
           <div className="mb-6">
             <FilterPagination
               search={search}
@@ -216,7 +216,7 @@ export default function MovimientosPage() {
             />
           </div>
 
-          {/* Table for desktop */}
+         
           <div className="hidden sm:block bg-slate-50 rounded-xl border-2 border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full">
@@ -296,7 +296,7 @@ export default function MovimientosPage() {
             </div>
           </div>
 
-          {/* Mobile: list cards */}
+     
           <div className="sm:hidden divide-y divide-slate-200 bg-white rounded-md">
             {loading ? (
               <div className="p-6 text-center text-slate-500">Cargando movimientos...</div>
@@ -329,7 +329,7 @@ export default function MovimientosPage() {
             ))}
           </div>
 
-          {/* Pagination Footer */}
+        
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-6 pt-4 border-t border-slate-200">
             <div className="text-slate-600 text-sm">
               Página <span className="font-semibold">{page}</span> de <span className="font-semibold">{totalPages}</span> — Total: <span className="font-semibold">{totalItems}</span> registros
@@ -354,7 +354,7 @@ export default function MovimientosPage() {
           </div>
         </div>
 
-        {/* Mobile quick bar */}
+        
         <div className="fixed bottom-4 left-0 right-0 z-40 px-4 sm:hidden">
           <div className="max-w-3xl mx-auto bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl p-3 flex gap-3">
             <button onClick={() => setRefreshKey(k => k + 1)} className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold">Actualizar</button>
@@ -369,4 +369,3 @@ export default function MovimientosPage() {
     </div>
   );
 }
-// ...existing code...
