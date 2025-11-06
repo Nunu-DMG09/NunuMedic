@@ -242,8 +242,15 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 - Email: davidmesta@gmail.com
 - GitHub: [@davidmesta](https://github.com/davidmesta)
 
+## 🖼️ Capturas
 
+<p align="center">
+  <img src="./frontend/public/cap2.png" alt="Pantalla de inicio de NUNUMEDIC" style="max-width:900px;width:100%;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.12)"/>
+</p>
 
+<p align="center">
+  <img src="./frontend/public/cap6.png" alt="Pantalla de inicio de NUNUMEDIC" style="max-width:900px;width:100%;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.12)"/>
+</p>
 ---
 
 ⭐ **¡Dale una estrella si te gusta este proyecto!** ⭐
