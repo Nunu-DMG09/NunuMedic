@@ -129,10 +129,10 @@ export default function Dashboard() {
 
   return (
     <>
-      {/* METRICS ROW */}
+      
       <div className="px-4 sm:px-8 lg:px-12 py-6 sm:py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {/* Total Ventas */}
+         
           <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full -translate-y-20 translate-x-20"></div>
             <div className="relative">
@@ -153,7 +153,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Total Ingresos */}
+          
           <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full -translate-y-20 translate-x-20"></div>
             <div className="relative">
@@ -175,7 +175,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Productos (Disponibles) */}
+     
           <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-purple-100 to-violet-100 rounded-full -translate-y-20 translate-x-20"></div>
             <div className="relative">
@@ -196,7 +196,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Actividad (movimientos) */}
+          
           <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-slate-200/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full -translate-y-20 translate-x-20"></div>
             <div className="relative">
@@ -219,7 +219,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* CONTENT GRID */}
+   
       <div className="flex-1 px-4 sm:px-8 lg:px-12 pb-8 sm:pb-10 overflow-auto">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 h-full">
           {/* LEFT: RECENT SALES */}
@@ -265,7 +265,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* RIGHT: ANALYTICS */}
+         
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-6 sm:p-8">
               <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-4">Productos mas vendidos</h3>
