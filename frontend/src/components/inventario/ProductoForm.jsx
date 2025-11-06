@@ -1,4 +1,4 @@
-// ...existing code...
+
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 
@@ -145,7 +145,7 @@ export default function ProductoForm({ product, onCreated, onUpdated, onClose })
 
   return (
     <div>
-      {/* Progress indicator */}
+      
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ export default function ProductoForm({ product, onCreated, onUpdated, onClose })
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Section 1: Basic Information */}
+       
         <div className="bg-white rounded-2xl border-2 border-slate-200 p-4 sm:p-6 relative overflow-hidden">
           <div className="relative">
             <h4 className="text-base sm:text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -232,7 +232,7 @@ export default function ProductoForm({ product, onCreated, onUpdated, onClose })
           </div>
         </div>
 
-        {/* Section 2: Pricing & Stock */}
+       
         <div className="bg-white rounded-2xl border-2 border-slate-200 p-4 sm:p-6 relative overflow-hidden">
           <div className="relative">
             <h4 className="text-base sm:text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -293,7 +293,7 @@ export default function ProductoForm({ product, onCreated, onUpdated, onClose })
           </div>
         </div>
 
-        {/* Section 3: Configuration */}
+        
         <div className="bg-white rounded-2xl border-2 border-slate-200 p-4 sm:p-6 relative overflow-hidden">
           <div className="relative">
             <h4 className="text-base sm:text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -333,7 +333,7 @@ export default function ProductoForm({ product, onCreated, onUpdated, onClose })
           </div>
         </div>
 
-        {/* Messages */}
+       
         {error && (
           <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 flex items-center gap-3">
             <div className="p-2 bg-red-100 rounded-lg">
@@ -362,7 +362,7 @@ export default function ProductoForm({ product, onCreated, onUpdated, onClose })
           </div>
         )}
 
-        {/* Actions */}
+     
         <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-200">
           {onClose && (
             <button
@@ -401,4 +401,3 @@ export default function ProductoForm({ product, onCreated, onUpdated, onClose })
     </div>
   );
 }
-// ...existing code...
