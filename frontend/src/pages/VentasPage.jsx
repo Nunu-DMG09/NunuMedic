@@ -18,7 +18,7 @@ export default function VentasPage() {
       <div className="max-w-5xl mx-auto">
         {!cliente ? (
           <div className="max-w-2xl mx-auto">
-            {/* Header */}
+            
             <div className="text-center mb-8 sm:mb-10">
               <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-3">
                 Sistema de Ventas
@@ -30,7 +30,7 @@ export default function VentasPage() {
           </div>
         ) : (
           <div>
-            {/* Header con cliente seleccionado */}
+           
             <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-8 mb-6 sm:mb-8">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -73,7 +73,7 @@ export default function VentasPage() {
               </div>
             </div>
 
-            {/* Formulario de venta */}
+           
             <VentasForm cliente={cliente} />
           </div>
         )}

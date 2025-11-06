@@ -38,7 +38,7 @@ export default function VentasHistorialPage() {
   function openDetail(v) { setSelected(v); }
   function closeDetail() { setSelected(null); }
 
-  // Filtrado local
+  
   const filteredVentas = useMemo(() => {
     if (!ventas || ventas.length === 0) return [];
 
@@ -177,7 +177,7 @@ export default function VentasHistorialPage() {
     }
   }
 
-  // Calcular estadísticas
+ 
   const totalVentasAmount = filteredVentas.reduce((sum, v) => sum + Number(v.total || 0), 0);
   const ventasHoy = filteredVentas.filter(v => {
     const today = new Date().toISOString().split('T')[0];
@@ -190,7 +190,7 @@ export default function VentasHistorialPage() {
       <div className="max-w-7xl mx-auto">
         <VentasHeader />
 
-        {/* Stats Cards */}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-16 sm:w-20 h-16 sm:h-20 bg-blue-100 rounded-full -translate-y-8 sm:-translate-y-10 translate-x-8 sm:translate-x-10 opacity-50"></div>
@@ -261,7 +261,7 @@ export default function VentasHistorialPage() {
           </div>
         </div>
 
-        {/* Main Content */}
+       
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-8">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
@@ -304,7 +304,7 @@ export default function VentasHistorialPage() {
             </div>
           </div>
 
-          {/* Filters */}
+         
           <div className="bg-slate-50 rounded-xl border-2 border-slate-200 p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <div>
@@ -373,7 +373,7 @@ export default function VentasHistorialPage() {
             </div>
           </div>
 
-          {/* Desktop Table */}
+        
           <div className="hidden md:block bg-slate-50 rounded-xl border-2 border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full">
@@ -492,7 +492,7 @@ export default function VentasHistorialPage() {
             </div>
           </div>
 
-          {/* Mobile Cards */}
+         
           <div className="md:hidden space-y-4">
             {loading ? (
               <div className="p-8 text-center">
@@ -562,7 +562,7 @@ export default function VentasHistorialPage() {
             )}
           </div>
 
-          {/* Pagination */}
+         
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200">
             <div className="text-slate-600 text-sm">
               Página <span className="font-semibold">{page}</span> de <span className="font-semibold">{totalPages}</span> — 
@@ -593,7 +593,7 @@ export default function VentasHistorialPage() {
           </div>
         </div>
 
-        {/* Modal de Detalle */}
+       
         {selected && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
@@ -635,7 +635,7 @@ export default function VentasHistorialPage() {
                 </div>
               </div>
 
-              {/* Modal Content */}
+              
               <div className="p-4 sm:p-8 max-h-[70vh] overflow-y-auto">
                 {/* Info Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -659,7 +659,7 @@ export default function VentasHistorialPage() {
                   </div>
                 </div>
 
-                {/* Products Table */}
+              
                 <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
                   <div className="px-4 sm:px-6 py-3 sm:py-4 bg-slate-100 border-b border-slate-200">
                     <h4 className="text-base sm:text-lg font-bold text-slate-800">Productos Vendidos</h4>
