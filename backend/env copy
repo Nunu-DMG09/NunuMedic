@@ -8,5 +8,5 @@
 #SMTP_PASSWORD= 'tu contraseña de aplicación gmail'
 #SMTP_PORT=587
 #SMTP_SECURE=false
-# ALERT_EMAIL_TO= 'tu gmail'
+#ALERT_EMAIL_TO= 'tu gmail'
 #VITE_FRONTEND_URL=http://localhost:5173
