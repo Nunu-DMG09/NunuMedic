@@ -1,4 +1,4 @@
-// ...existing code...
+
 import React, { useState } from 'react';
 
 export default function FilterPagination({
@@ -26,7 +26,7 @@ export default function FilterPagination({
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // helper to compute a compact page range centered on current page
+  
   function getPageRange(total, current, maxButtons = 5) {
     const half = Math.floor(maxButtons / 2);
     let start = Math.max(1, current - half);
@@ -50,7 +50,7 @@ export default function FilterPagination({
           <p className="text-slate-600 text-sm hidden sm:block">Utiliza los filtros para encontrar productos específicos</p>
         </div>
 
-        {/* Mobile: toggle advanced filters */}
+       
         <div className="sm:hidden">
           <button
             onClick={() => setShowAdvanced(s => !s)}
@@ -63,7 +63,7 @@ export default function FilterPagination({
 
       <div className={`${showAdvanced ? 'block' : 'hidden'} sm:block`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          {/* Search */}
+      
           <div className="lg:col-span-2">
             <label className="block text-sm font-semibold text-slate-700 mb-2">Buscar Producto</label>
             <div className="relative">
@@ -82,7 +82,7 @@ export default function FilterPagination({
             </div>
           </div>
 
-          {/* Category Filter */}
+        
           {showCategoria && (
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Categoría</label>
@@ -106,7 +106,7 @@ export default function FilterPagination({
             </div>
           )}
 
-          {/* Estado Filter */}
+          
           {showEstado && (
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Estado</label>
@@ -131,7 +131,7 @@ export default function FilterPagination({
           )}
         </div>
 
-        {/* Additional Filters Row */}
+      
         {(tipoOptions?.length > 0 || showDateFilter) && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             {tipoOptions?.length > 0 && (
@@ -184,9 +184,9 @@ export default function FilterPagination({
         </div>
       </div>
 
-      {/* Improved responsive pagination controls */}
+    
       <div className="pt-4 border-t border-slate-200 mt-4">
-        {/* Mobile compact pagination */}
+     
         <div className="flex items-center justify-between sm:hidden">
           <button
             onClick={() => onPageChange(Math.max(1, page - 1))}
@@ -209,7 +209,7 @@ export default function FilterPagination({
           </button>
         </div>
 
-        {/* Desktop / tablet pagination with first/last and ellipsis */}
+       
         <div className="hidden sm:flex items-center justify-between">
           <div className="text-sm text-slate-600">Página {page} de {totalPages}</div>
 
@@ -224,7 +224,7 @@ export default function FilterPagination({
             </button>
 
             <div className="flex items-center gap-1">
-              {/* First page */}
+              
               {start > 1 && (
                 <>
                   <button
@@ -237,7 +237,7 @@ export default function FilterPagination({
                 </>
               )}
 
-              {/* Range around current */}
+              
               {Array.from({ length: end - start + 1 }).map((_, i) => {
                 const pageNum = start + i;
                 return (
@@ -252,7 +252,7 @@ export default function FilterPagination({
                 );
               })}
 
-              {/* Last page */}
+           
               {end < totalPages && (
                 <>
                   {end < totalPages - 1 && <div className="px-2 text-slate-400">…</div>}
@@ -280,4 +280,3 @@ export default function FilterPagination({
     </div>
   );
 }
-// ...existing code...
