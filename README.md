@@ -23,7 +23,7 @@ NUNUMEDIC es un **sistema web Fullstack** diseñado para automatizar la gestión
 ## 🏗️ Arquitectura del Proyecto
 
 ```
-NUNUMEDIC/
+NUNUMED/
 ├── 📁 frontend/          # React + Tailwind CSS + Vite
 │   ├── src/
 │   │   ├── components/   # Componentes reutilizables
@@ -124,15 +124,14 @@ npm run dev
 ## 🖥️ URLs del Sistema
 
 - **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:5000
-- **Documentación API**: http://localhost:5000/api-docs
+- **Backend API**: http://localhost:4000
 
 ## 👤 Usuarios de Prueba
 
 | Usuario | Contraseña | Rol | DNI |
 |---------|------------|-----|-----|
-| 72357275 | 123456 | Super Admin | 72357275 |
-| 87654321 | admin123 | Admin | 87654321 |
+| 72357275 | 72357275 | Super Admin | 72357275 |
+| 87654321 | 87654321 | Admin | 87654321 |
 
 ## 📚 Estructura de la Base de Datos
 
@@ -234,7 +233,6 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 **L. David Mesta**
 - Email: davidmesta@gmail.com
-- LinkedIn: [davidmesta](https://linkedin.com/in/davidmesta)
 - GitHub: [@davidmesta](https://github.com/davidmesta)
 
 
