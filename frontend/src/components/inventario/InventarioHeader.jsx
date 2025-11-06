@@ -1,4 +1,4 @@
-// ...existing code...
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -64,7 +64,7 @@ export default function InventarioHeader({
                 <span className="text-white font-bold text-sm sm:text-xl">NU</span>
               </div>
 
-              {/* Mobile quick action */}
+             
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 className="sm:hidden p-2 rounded-md bg-white/5 text-white hover:bg-white/10"
@@ -81,4 +81,3 @@ export default function InventarioHeader({
     </header>
   );
 }
-// ...existing code...
