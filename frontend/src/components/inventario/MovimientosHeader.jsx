@@ -1,4 +1,4 @@
-// ...existing code...
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ export default function MovimientosHeader({
 
   return (
     <header className="bg-gradient-to-r from-slate-800 via-slate-900 to-indigo-900 relative overflow-hidden rounded-2xl mb-6 sm:mb-8 shadow-xl">
-      {/* Decorative elements - hidden on small screens */}
+      
       <div className="absolute inset-0 pointer-events-none">
         <div className="hidden sm:block absolute top-0 left-1/4 w-48 h-48 bg-blue-500/10 rounded-full -translate-y-28" />
         <div className="hidden md:block absolute bottom-0 right-1/4 w-72 h-72 bg-indigo-500/10 rounded-full translate-y-36" />
@@ -20,7 +20,7 @@ export default function MovimientosHeader({
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          {/* Left: Back button */}
+         
           <div className="w-full sm:w-auto">
             <button
               onClick={() => navigate(backTo)}
@@ -35,7 +35,7 @@ export default function MovimientosHeader({
             </button>
           </div>
 
-          {/* Center: Title */}
+         
           <div className="flex-1 text-center min-w-0">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <div className="p-2 sm:p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl shadow-lg">
@@ -51,7 +51,7 @@ export default function MovimientosHeader({
             </div>
           </div>
 
-          {/* Right: Stats or actions */}
+         
           <div className="w-full sm:w-auto flex items-center justify-end gap-3">
             <div className="hidden sm:flex flex-col items-end text-right">
               <div className="text-base sm:text-2xl font-bold text-white">NUNUMEDIC</div>
@@ -63,7 +63,7 @@ export default function MovimientosHeader({
                 <span className="text-white font-bold text-sm sm:text-xl">MV</span>
               </div>
 
-              {/* Mobile quick action */}
+            
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 className="sm:hidden p-2 rounded-md bg-white/5 text-white hover:bg-white/10"
@@ -80,4 +80,3 @@ export default function MovimientosHeader({
     </header>
   );
 }
-// ...existing code...
