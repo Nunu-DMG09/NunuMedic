@@ -17,17 +17,16 @@ export default function DashboardLayout() {
   // notificaciones de stock bajo
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unseenCount, setUnseenCount] = useState(0); // contador de notificaciones nuevas
+  const [unseenCount, setUnseenCount] = useState(0); 
   const acknowledgedRef = useRef(new Set());
   const pollingRef = useRef(null);
-  const prevLowIdsRef = useRef(new Set()); // para detectar nuevos ítems entre polls
+  const prevLowIdsRef = useRef(new Set()); 
 
-  // estado para controlar sidebar (colapsado / expandido)
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const fetchLowStock = async () => {
     try {
-      // traer muchos registros y filtrar en cliente (si tienes endpoint específico usa ese)
+      
       const res = await api.get('/api/productos/paginar', { params: { page: 1, perPage: 1000 } });
       const payload = res.data ?? {};
       const items = Array.isArray(payload.items) ? payload.items : (Array.isArray(payload.data) ? payload.data : []);
@@ -37,12 +36,12 @@ export default function DashboardLayout() {
         return !isNaN(minNum) && stockNum <= minNum;
       });
 
-      // detectar nuevos productos que han llegado al mínimo desde la última verificación
+    
       const lowIds = new Set(low.map(p => String(p.id_producto ?? p.id ?? p.idProducto ?? '')));
       const prevIds = prevLowIdsRef.current || new Set();
       const newly = Array.from(lowIds).filter(id => id && !prevIds.has(id));
       if (newly.length > 0) {
-        // aumentar unseenCount automáticamente (sin recargar)
+        
         setUnseenCount(c => c + newly.length);
       }
       prevLowIdsRef.current = lowIds;
@@ -55,8 +54,7 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     fetchLowStock();
-    // poll cada 60s
-    pollingRef.current = setInterval(fetchLowStock, 60000);
+    pollingRef.current = setInterval(fetchLowStock, 6000);
     return () => clearInterval(pollingRef.current);
   }, []);
 
@@ -65,14 +63,14 @@ export default function DashboardLayout() {
     const sid = String(id);
     if (!acknowledgedRef.current.has(sid)) {
       acknowledgedRef.current.add(sid);
-      // decrementar contador unseen si estaba sin leer
+      
       setUnseenCount(c => Math.max(0, c - 1));
-      // forzar re-render actualizando estado (copia vacía)
+      
       setLowStockProducts(prev => prev.slice());
     }
    };
    const handleGoToInventario = (id) => {
-     // opcional: navegar a inventario y/o abrir modal para producto
+     
      navigate('/inventario');
      setShowNotifications(false);
    };
@@ -100,7 +98,7 @@ export default function DashboardLayout() {
   const handleConfirmLogout = async () => {
     setLoggingOut(true);
     try {
-      // intenta invalidar sesión en backend si existe endpoint
+      
       if (token) {
         await fetch('/api/auth/logout', {
           method: 'POST',
@@ -108,7 +106,7 @@ export default function DashboardLayout() {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify({}) // algunos backends aceptan sin body
+          body: JSON.stringify({}) 
         }).catch(() => { /* ignorar errores de red */ });
       }
     } catch (e) {
@@ -124,7 +122,7 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* SIDEBAR - Mobile overlay and desktop fixed */}
+      
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 md:hidden" 
@@ -137,9 +135,13 @@ export default function DashboardLayout() {
         
         {/* Logo */}
         <div className="mb-10">
-          <div className="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-xl">NU</span>
-          </div>
+          <button
+            onClick={() => navigate('/dashboard')}
+            title="Ir a Administradores"
+            className="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg focus:outline-none"
+          >
+            <span className="text-white font-bold text-xl select-none">NU</span>
+          </button>
         </div>
         
         {/* Menu Items */}
@@ -170,14 +172,14 @@ export default function DashboardLayout() {
         <div className="mt-auto text-xs text-slate-400 font-medium">v2.0</div>
       </nav>
 
-      {/* MAIN CONTENT AREA */}
+     
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* TOP HEADER - Responsive */}
+     
         <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-slate-200/50 px-4 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-6">
           <div className="flex justify-between items-center">
-            {/* Left side - Title and mobile menu */}
+          
             <div className="flex items-center gap-3 sm:gap-6">
-              {/* Mobile menu button */}
+            
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="md:hidden p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
@@ -270,7 +272,7 @@ export default function DashboardLayout() {
                        )}
                      </div>
                      <div className="p-3 border-t border-slate-100 text-xs text-slate-500">
-                       Actualización automática cada 60s.
+                       Actualización automática cada 6s.
                      </div>
                    </div>
                  )}
@@ -286,8 +288,12 @@ export default function DashboardLayout() {
                 <span className="sm:hidden">Salir</span>
               </button>
 
-              {/* User Profile */}
-              <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2 sm:py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50">
+              {/* User Profile (navegar a AdminsPage al clicar) */}
+              <button
+                onClick={() => navigate('/admins')}
+                className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2 sm:py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50 hover:shadow-md transition-colors focus:outline-none"
+                title="Perfil / Usuarios"
+              >
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
                   <span className="text-white font-semibold text-xs sm:text-sm">DM</span>
                 </div>
@@ -297,7 +303,7 @@ export default function DashboardLayout() {
                 <span className="font-semibold text-slate-700 text-xs sm:hidden">
                   DM
                 </span>
-              </div>
+              </button>
             </div>
           </div>
         </header>
