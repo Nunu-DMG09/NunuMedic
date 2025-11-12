@@ -130,7 +130,7 @@ npm run dev
 
 | Usuario | Contraseña | Rol | DNI |
 |---------|------------|-----|-----|
-| 72357275 | 72357275 | Super Admin | 72357275 |
+| 12345678 | 12345678 | Super Admin | 12345678 |
 | 87654321 | 87654321 | Admin | 87654321 |
 
 ## 📚 Estructura de la Base de Datos
