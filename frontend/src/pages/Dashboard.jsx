@@ -22,6 +22,27 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
+  
+  const parseToDate = (v) => {
+    if (!v) return null;
+    const s = String(v);
+    let d = new Date(s);
+    if (isNaN(d)) {
+      d = new Date(s.replace(' ', 'T'));
+    }
+    if (isNaN(d)) return null;
+    return d;
+  };
+
+  const isSameLocalDay = (dateStr) => {
+    const d = parseToDate(dateStr);
+    if (!d) return false;
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear()
+      && d.getMonth() === now.getMonth()
+      && d.getDate() === now.getDate();
+  };
+
   async function fetchDashboardData() {
     try {
       setStats(prev => ({ ...prev, loading: true }));
@@ -38,31 +59,21 @@ export default function Dashboard() {
       const movimientos = movimientosRes?.data?.items || movimientosRes?.data?.data || movimientosRes?.data || [];
       const usuarios = usuariosRes?.data?.data || usuariosRes?.data || [];
 
-      const today = new Date().toISOString().split('T')[0];
-
-      const ventasHoy = ventas.filter(v => {
-        const f = v.fecha || v.fecha_venta || v.created_at || v.fecha_creacion || '';
-        if (!f) return false;
-        try {
-          return f.startsWith ? f.startsWith(today) : new Date(f).toISOString().startsWith(today);
-        } catch {
-          return false;
-        }
+      // ventas hoy (compara en hora local)
+      const ventasHoyArr = ventas.filter(v => {
+        const f = v.fecha || v.fecha_venta || v.created_at || v.fecha_creacion || v.fecha_formateada || '';
+        return isSameLocalDay(f);
       });
 
       const movimientosHoyArr = movimientos.filter(m => {
         const f = m.fecha_movimiento || m.fecha || m.created_at || '';
-        if (!f) return false;
-        try {
-          return f.startsWith ? f.startsWith(today) : new Date(f).toISOString().startsWith(today);
-        } catch {
-          return false;
-        }
+        return isSameLocalDay(f);
       });
 
       const totalIngresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || v.total_venta || 0), 0);
-      const ingresosHoy = ventasHoy.reduce((sum, v) => sum + parseFloat(v.total || v.total_venta || 0), 0);
+      const ingresosHoy = ventasHoyArr.reduce((sum, v) => sum + parseFloat(v.total || v.total_venta || 0), 0);
 
+     
       const productosDisponibles = productos.filter(p => String(p.estado).toLowerCase() === 'disponible').length;
       const totalProductos = productos.length;
 
@@ -108,7 +119,7 @@ export default function Dashboard() {
 
       setStats({
         totalVentas: ventas.length,
-        ventasHoy: ventasHoy.length,
+        ventasHoy: ventasHoyArr.length,
         totalIngresos: totalIngresos,
         ingresosHoy: ingresosHoy,
         totalProductos: totalProductos,
@@ -123,6 +134,7 @@ export default function Dashboard() {
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      
       setStats(prev => ({ ...prev, loading: false }));
     }
   }
