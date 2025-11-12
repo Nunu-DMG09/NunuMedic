@@ -11,7 +11,7 @@ exports.up = async function(knex) {
     table.increments('id_cliente').primary();
     table.string('nombre', 100).notNullable();
     table.string('apellido', 100).nullable();
-    // usar string(8) en vez de char para evitar `undefined` en SQL
+   
     table.string('dni', 8).nullable();
     table.string('telefono', 15).nullable();
     table.string('direccion', 255).nullable();
@@ -88,7 +88,7 @@ exports.up = async function(knex) {
     table.timestamp('fecha_movimiento').notNullable().defaultTo(knex.fn.now());
   });
 
-  // Agregar columna generated subtotal en detalle_venta (MySQL syntax)
+  
   await knex.raw(`
     ALTER TABLE detalle_venta
     ADD COLUMN subtotal decimal(10,2) GENERATED ALWAYS AS (cantidad * precio_unitario) STORED
