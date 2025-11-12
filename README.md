@@ -240,7 +240,6 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 **L. David Mesta**
 - Email: davidmesta09@gmail.com
-- GitHub: [@davidmesta](https://github.com/davidmesta)
 
 ## 🖼️ Capturas
 
