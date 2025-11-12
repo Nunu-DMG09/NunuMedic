@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 
 module.exports.seed = async function(knex) {
-  // borrar datos existentes en orden seguro
+
   await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
   await knex('detalle_venta').del().catch(() => {});
   await knex('movimiento_stock').del().catch(() => {});
@@ -11,7 +11,7 @@ module.exports.seed = async function(knex) {
   await knex('usuario').del().catch(() => {});
   await knex.raw('SET FOREIGN_KEY_CHECKS = 1');
 
-  // insertar 20 categorías con ids controlados (para referenciarlas en productos)
+  
   const categorias = [
     { id_categoria: 1, nombre_categoria: 'Cuidado de la piel', descripcion: 'Productos para limpieza, hidratación y tratamiento facial y corporal' },
     { id_categoria: 2, nombre_categoria: 'Cuidado del cabello', descripcion: 'Champús, acondicionadores, tratamientos y styling' },
@@ -89,24 +89,23 @@ module.exports.seed = async function(knex) {
     { nombre_producto: 'Kit analgésicos básico', descripcion: 'Paracetamol e ibuprofeno', id_categoria: 4, precio_compra: 2.5, precio_venta: 6.5, stock: 12, stock_minimo: 4, fecha_vencimiento: '2027-01-01', estado: 'disponible' }
   ];
 
-  // insertar productos en lotes para no exceder tamaño de query
+ 
   const chunkSize = 25;
   for (let i = 0; i < productos.length; i += chunkSize) {
     const chunk = productos.slice(i, i + chunkSize);
     await knex('producto').insert(chunk);
   }
 
-  // crear 2 usuarios: super_admin (DAVID MESTA) y admin
-  const passSuper = bcrypt.hashSync('72357275', 10); // clave = dni
+  const passSuper = bcrypt.hashSync('12345678', 10); 
   const passAdmin = bcrypt.hashSync('87654321', 10);
 
   const usuarios = [
-    { nombre: 'DAVID', apellido: 'MESTA', dni: '72357275', telefono: '987654321', email: 'davidmesta@gmail.com', usuario: '72357275', clave: passSuper, rol: 'super_admin', estado: 'activo' },
+    { nombre: 'DAVID', apellido: 'MESTA', dni: '12345678', telefono: '987654321', email: 'davidmesta@gmail.com', usuario: '12345678', clave: passSuper, rol: 'super_admin', estado: 'activo' },
     { nombre: 'Admin', apellido: 'Local', dni: '87654321', telefono: '999999999', email: 'admin_local@example.com', usuario: '87654321', clave: passAdmin, rol: 'admin', estado: 'activo' }
   ];
 
   await knex('usuario').insert(usuarios);
 
-  // si knex usa tabla knex_migrations, dejarla intacta; fin de seed
+ 
   return;
 };
