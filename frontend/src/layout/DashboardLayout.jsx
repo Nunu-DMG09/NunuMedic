@@ -22,6 +22,9 @@ export default function DashboardLayout() {
   const prevLowIdsRef = useRef(new Set()); 
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); 
+  const [isPinned, setIsPinned] = useState(false);     
+  const togglePin = () => { setIsPinned(p => { const next = !p; setIsExpanded(next); return next; }); };
   
   const fetchLowStock = async () => {
     try {
@@ -111,7 +114,7 @@ export default function DashboardLayout() {
     } catch (e) {
       console.warn('Logout API error', e);
     } finally {
-      // limpiar contexto y redirigir al login
+    
       logout();
       setLoggingOut(false);
       setIsLogoutModalOpen(false);
@@ -129,7 +132,9 @@ export default function DashboardLayout() {
         />
       )}
       
-      <nav className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-50 md:z-auto w-28 h-full bg-white shadow-xl border-r border-slate-200/60 flex flex-col items-center py-8 transition-transform duration-300`}>
+      <nav
+        className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-50 md:z-auto ${isExpanded ? 'w-56' : 'w-28'} h-full bg-white shadow-xl border-r border-slate-200/60 flex flex-col items-center py-6 transition-all duration-700 ease-out`}
+      >
         <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600"></div>
         
        
@@ -152,25 +157,65 @@ export default function DashboardLayout() {
               title={item.label}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `group relative flex items-center justify-center p-3 rounded-xl transition-all duration-300 ${
+                `group relative flex items-center ${isExpanded ? 'justify-start pl-4 pr-3' : 'justify-center'} gap-3 p-3 rounded-xl transform-gpu transition-all duration-700 ease-out ${
                   isActive 
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg scale-105' 
-                    : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-105'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' 
+                    : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'
                 }`
               }
             >
-              {item.icon}
-              <div className="absolute left-full ml-6 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 min-w-max">
-                {item.label}
+            
+              <div className="flex items-center justify-center w-10 h-10 flex-shrink-0">
+                <div className="w-8 h-8 flex items-center justify-center transform-gpu transition-transform duration-700" style={{ transformOrigin: 'center' }}>
+                  {item.icon}
+                </div>
               </div>
+
+         
+              <span
+                className={`text-sm font-medium text-slate-800 transition-all duration-700 ease-out overflow-hidden whitespace-nowrap ${isExpanded ? 'max-w-[260px] opacity-100 ml-2' : 'max-w-0 opacity-0'}`}
+                aria-hidden={!isExpanded}
+              >
+                {item.label}
+              </span>
+
+           
+              {!isExpanded && (
+                <div className="absolute left-full ml-6 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                  {item.label}
+                </div>
+              )}
             </NavLink>
           ))}
-        </div>
-
-        
-        <div className="mt-auto text-xs text-slate-400 font-medium">v2.0</div>
-      </nav>
-
+          
+         
+           <div className="mt-2 flex items-center justify-center w-full">
+            <button
+              onClick={togglePin}
+              title={isPinned ? 'Desanclar menú' : 'Anclar menú expandido'}
+              className={`flex items-center gap-2 w-full ${isExpanded ? 'justify-between px-4' : 'justify-center'} py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-all duration-300`}
+            >
+              <svg
+                className={`w-5 h-5 transform transition-transform duration-300 ${isPinned ? 'rotate-90 text-blue-600' : 'rotate-0 text-slate-600'}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+              <span className={`text-sm ${isExpanded ? 'inline' : 'hidden'}`}></span>
+            </button>
+          </div>
+          </div>
+ 
+         
+         <div className="mt-auto text-xs text-slate-400 font-medium">v2.0</div>
+       </nav>
+ 
      
       <div className="flex-1 flex flex-col overflow-hidden">
      
