@@ -14,6 +14,13 @@ export default function VentasForm({ cliente = null }) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [ventaCreada, setVentaCreada] = useState(null);
 
+  
+  const [pagoEfectivo, setPagoEfectivo] = useState('');
+  const [pagoYape, setPagoYape] = useState('');
+  const [incluirIGV, setIncluirIGV] = useState(true); 
+ 
+  const [boletaData, setBoletaData] = useState(null);
+
   useEffect(() => { fetchProductos(); }, []);
 
   useEffect(() => {
@@ -92,7 +99,14 @@ export default function VentasForm({ cliente = null }) {
   }
 
   const filtered = productos.filter(p => !search || String(p.nombre_producto ?? '').toLowerCase().includes(search.toLowerCase())).slice(0, 30);
-  const total = cart.reduce((s, it) => s + (Number(it.precio_unitario || 0) * Number(it.cantidad || 0)), 0);
+  const subtotal = cart.reduce((s, it) => s + (Number(it.precio_unitario || 0) * Number(it.cantidad || 0)), 0);
+  const igv = incluirIGV ? +(subtotal * 0.18) : 0;
+  const total = +(subtotal + igv);
+  const pagoEfectivoNum = Number(pagoEfectivo || 0);
+  const pagoYapeNum = Number(pagoYape || 0);
+  const totalPagado = +(pagoEfectivoNum + pagoYapeNum);
+  const vuelto = +(totalPagado - total);
+  const faltante = +(total - totalPagado);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -112,25 +126,57 @@ export default function VentasForm({ cliente = null }) {
       }
     }
 
+   
+    if (total > 0 && totalPagado < total) {
+      return setMessage({ type: 'error', text: `Pago incompleto. Faltan S/. ${Math.abs(faltante).toFixed(2)}` });
+    }
+
     setSubmitting(true);
     setMessage(null);
     try {
       const payload = {
+        subtotal,
+        igv,
         total,
         items: cart.map(i => ({ id_producto: i.id_producto, cantidad: Number(i.cantidad), precio_unitario: Number(i.precio_unitario) })),
         id_cliente: id_cliente ? Number(id_cliente) : null,
-        metodo_pago: metodoPago
+        metodo_pago: metodoPago,
+        pagos: {
+          efectivo: pagoEfectivoNum,
+          yape: pagoYapeNum
+        },
+        incluir_igv: incluirIGV
       };
       const res = await api.post('/api/ventas/create', payload);
 
+      const productNames = cart.map(i => i.nombre_producto || 'Producto');
+
       setVentaCreada({
-        id: res.data?.id_venta ?? 'N/A',
+        id: res.data?.id_venta ?? res.data?.id ?? 'N/A',
         total: total,
         cliente: clienteNombre || 'Cliente Anónimo',
-        items: cart.length
+        items: cart.length,
+        itemsNames: productNames,
+        pagos: { efectivo: pagoEfectivoNum, yape: pagoYapeNum },
+        vuelto: vuelto > 0 ? vuelto : 0
       });
       setShowSuccessModal(true);
 
+     
+      setBoletaData({
+        serie: 'B001-0001',
+        id: res.data?.id_venta ?? res.data?.id ?? 'N/A',
+        fecha: new Date().toLocaleString(),
+        cliente: clienteNombre || 'Cliente Anónimo',
+        items: cart.map(i => ({ nombre: i.nombre_producto, qty: i.cantidad, precio: Number(i.precio_unitario), monto: Number(i.precio_unitario) * Number(i.cantidad) })),
+        subtotal,
+        igv,
+        total,
+        pagos: { efectivo: pagoEfectivoNum, yape: pagoYapeNum },
+        vuelto: vuelto > 0 ? vuelto : 0
+      });
+
+      
       setCart([]);
       setMetodoPago('efectivo');
       setMessage(null);
@@ -144,17 +190,102 @@ export default function VentasForm({ cliente = null }) {
     }
   }
 
+  function printBoleta(data) {
+    if (!data) return;
+    const itemsHtml = (data.items || []).map(it => `<tr><td style="padding:6px 4px">${escapeHtml(it.nombre)}</td><td style="text-align:center;padding:6px 4px">${it.qty}</td><td style="text-align:right;padding:6px 4px">S/. ${it.precio.toFixed(2)}</td><td style="text-align:right;padding:6px 4px">S/. ${it.monto.toFixed(2)}</td></tr>`).join('');
+
+    const qrImg = `<img src="${window.location.origin}/qr.png" alt="QR" width="120" style="display:block;margin:8px auto" />`;
+    const html = `
+      <html>
+      <head>
+        <title>Boleta - ${data.serie} #${data.id}</title>
+        <meta charset="utf-8" />
+        <style>
+          @page { margin: 10mm 8mm; }
+          body { font-family: Arial, Helvetica, sans-serif; font-size:12px; color:#111; padding:14px; margin:0; }
+          .container { width:100%; max-width:420px; margin:0 auto; } /* más ancho para mejor impresión */
+          .center { text-align:center }
+          table { width:100%; border-collapse:collapse; margin-top:8px; font-size:12px; }
+          td { padding:6px 4px; vertical-align:top; border-bottom: 1px dashed #e6e6e6; }
+          .right { text-align:right; }
+          .small { font-size:11px; color:#555; }
+          .total { font-weight:700; font-size:14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <!-- Cabecera profesional -->
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+            <div>
+              <div style="font-weight:700;font-size:16px">NunuMedic</div>
+              <div class="small">RUC: 20512345678</div>
+              <div class="small">Av. Principal 123, Ciudad - Tel: (01) 234-5678</div>
+            </div>
+            <div style="text-align:right" class="small">
+              <div>Boleta: <strong>${data.serie}</strong></div>
+              <div>Nº: <strong>${data.id}</strong></div>
+              <div>${data.fecha}</div>
+            </div>
+          </div>
+
+           <div>
+             <table>
+               <tbody>
+                <tr><td style="padding:6px 4px;font-weight:600">Descripción</td><td style="text-align:center;padding:6px 4px;font-weight:600">Cant</td><td style="text-align:right;padding:6px 4px;font-weight:600">P.Unit</td><td style="text-align:right;padding:6px 4px;font-weight:600">Importe</td></tr>
+                 ${itemsHtml}
+               </tbody>
+             </table>
+             <hr />
+             <div style="display:flex;justify-content:space-between;">
+               <div class="small">SUBTOTAL</div><div class="right">S/. ${data.subtotal.toFixed(2)}</div>
+             </div>
+             <div style="display:flex;justify-content:space-between;">
+               <div class="small">IGV (18%)</div><div class="right">S/. ${data.igv.toFixed(2)}</div>
+             </div>
+             <div style="display:flex;justify-content:space-between;margin-top:6px;">
+               <div class="total">TOTAL</div><div class="right total">S/. ${data.total.toFixed(2)}</div>
+             </div>
+             <div style="display:flex;justify-content:space-between;margin-top:8px;" class="small">
+               <div>Pagos</div><div class="right">Efectivo S/. ${data.pagos.efectivo.toFixed(2)} • Yape S/. ${data.pagos.yape.toFixed(2)}</div>
+             </div>
+             <div style="display:flex;justify-content:space-between;margin-top:6px;" class="small">
+               <div>Vuelto</div><div class="right">S/. ${data.vuelto.toFixed(2)}</div>
+             </div>
+             <div style="margin-top:12px;display:flex;justify-content:center">
+              ${qrImg}
+             </div>
+             <div class="center small" style="margin-top:6px">Gracias por su compra</div>
+           </div>
+         </div>
+       </body>
+       </html>
+     `;
+     const w = window.open('', '_blank', 'width=400,height=700');
+     if (!w) return alert('Permite ventanas emergentes para imprimir la boleta.');
+     w.document.open();
+     w.document.write(html);
+     w.document.close();
+     w.focus();
+     setTimeout(() => { w.print(); }, 300);
+   }
+
+   
+   function escapeHtml(str) {
+     if (!str) return '';
+     return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+   }
+
   return (
     <>
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-8">
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* LEFT: PRODUCTOS */}
+         
             <div className="lg:col-span-2 space-y-4">
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-3">Catálogo de Productos</h3>
 
-                {/* Search */}
+              
                 <div className="relative mb-4">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
@@ -170,8 +301,7 @@ export default function VentasForm({ cliente = null }) {
                   />
                 </div>
 
-                {/* Products List */}
-                <div className="bg-slate-50 rounded-xl border border-slate-200 max-h-72 sm:max-h-96 overflow-y-auto">
+                <div className="bg-slate-50 rounded-xl border border-slate-200 h-[70vh] max-h-[70vh] overflow-y-auto">
                   {loadingProducts ? (
                     <div className="p-6 text-center text-slate-500">Cargando productos...</div>
                   ) : filtered.length === 0 ? (
@@ -206,7 +336,6 @@ export default function VentasForm({ cliente = null }) {
               </div>
             </div>
 
-            {/* RIGHT: CART & DETAILS */}
             <div className="space-y-4">
               <div className="space-y-3">
                 <h3 className="text-lg font-bold text-slate-800">Detalles de Venta</h3>
@@ -229,11 +358,41 @@ export default function VentasForm({ cliente = null }) {
                     <option value="tarjeta"> Tarjeta</option>
                     <option value="yape"> Yape</option>
                     <option value="plin"> Plin</option>
+                    <option value="mixto"> Mixto</option>
                   </select>
                 </div>
+
+            
+                <div className="grid grid-cols-1 gap-3 mt-2">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" checked={incluirIGV} onChange={e => setIncluirIGV(!!e.target.checked)} className="form-checkbox" />
+                    Incluir IGV (18%)
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs text-slate-600">Pago en efectivo</label>
+                      <input type="number" step="0.01" min="0" value={pagoEfectivo} onChange={e => setPagoEfectivo(e.target.value)} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-600">Pago móvil (Yape / Plin)</label>
+                      <input type="number" step="0.01" min="0" value={pagoYape} onChange={e => setPagoYape(e.target.value)} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl" />
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-slate-600">
+                    <div>Subtotal: S/. {subtotal.toFixed(2)}</div>
+                    <div>IGV (18%): S/. {igv.toFixed(2)}</div>
+                    <div className="font-bold">Total a pagar: S/. {total.toFixed(2)}</div>
+                    <div className={`mt-2 ${totalPagado >= total ? 'text-emerald-600' : 'text-red-600'}`}>
+                      { totalPagado >= total ? `Vuelto: S/. ${Math.abs(vuelto).toFixed(2)}` : `Faltante: S/. ${Math.abs(faltante).toFixed(2)}` }
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
-              {/* Cart */}
+           
               <div className="bg-slate-50 rounded-xl border-2 border-slate-200 p-4">
                 <h4 className="font-bold text-slate-800 mb-3 flex items-center justify-between">Carrito <span className="text-sm text-slate-600">({cart.length})</span></h4>
 
@@ -301,7 +460,7 @@ export default function VentasForm({ cliente = null }) {
 
                 <button
                   type="button"
-                  onClick={() => { setCart([]); setMessage(null); }}
+                  onClick={() => { setCart([]); setMessage(null); setPagoEfectivo(''); setPagoYape(''); }}
                   className="w-full sm:w-auto px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-all duration-200"
                 >
                   Limpiar
@@ -312,7 +471,6 @@ export default function VentasForm({ cliente = null }) {
         </form>
       </div>
 
-      {/* SUCCESS MODAL */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
@@ -330,24 +488,35 @@ export default function VentasForm({ cliente = null }) {
             <div className="bg-slate-50 rounded-xl p-4 mb-4 space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-slate-600">ID de Venta:</span><span className="font-bold">#{ventaCreada?.id}</span></div>
               <div className="flex justify-between"><span className="text-slate-600">Cliente:</span><span className="font-medium">{ventaCreada?.cliente}</span></div>
-              <div className="flex justify-between"><span className="text-slate-600">Productos:</span><span className="font-medium">{ventaCreada?.items} items</span></div>
+              <div className="flex flex-col"><span className="text-slate-600">Productos:</span>
+                <div className="font-medium mt-1 text-sm">
+                  {ventaCreada?.itemsNames?.length ? ventaCreada.itemsNames.join(', ') : `${ventaCreada?.items ?? 0} items`}
+                </div>
+              </div>
               <div className="flex justify-between border-t border-slate-200 pt-2"><span className="text-slate-600 font-semibold">Total:</span><span className="font-bold">S/. {ventaCreada?.total?.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-slate-600">Pagos:</span><span className="font-medium">E: S/. {(ventaCreada?.pagos?.efectivo ?? 0).toFixed(2)} • Y: S/. {(ventaCreada?.pagos?.yape ?? 0).toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-slate-600">Vuelto:</span><span className="font-medium">S/. {(ventaCreada?.vuelto ?? 0).toFixed(2)}</span></div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => {
+                  if (boletaData) printBoleta(boletaData);
+                  setShowSuccessModal(false);
+                }}
+                className="w-full sm:flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded-xl transition-all duration-200"
+              >
+                Imprimir Boleta
+              </button>
               <button
                 onClick={() => {
                   setShowSuccessModal(false);
                   setVentaCreada(null);
                   setCart([]);
                   setMessage(null);
+                  setPagoEfectivo('');
+                  setPagoYape('');
                 }}
-                className="w-full sm:flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded-xl transition-all duration-200"
-              >
-                Nueva Venta
-              </button>
-              <button
-                onClick={() => setShowSuccessModal(false)}
                 className="w-full sm:w-auto px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-all duration-200"
               >
                 Cerrar
