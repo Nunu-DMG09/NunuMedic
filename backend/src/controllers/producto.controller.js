@@ -12,7 +12,7 @@ function toNumberOrNull(val) {
 }
 
 function normalizeFecha(fecha) {
-    if (!fecha) return null; // permitir null
+    if (!fecha) return null; 
     const s = String(fecha).trim();
     // Formato ISO YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
@@ -40,7 +40,7 @@ function normalizeFecha(fecha) {
         }
         return null;
     }
-    return null; // formato desconocido
+    return null;
 }
 
 export async function getAllProductos (req, res){
@@ -104,19 +104,19 @@ export async function createProducto(req, res) {
         const payload = {
             nombre_producto: String(nombre_producto).trim(),
             descripcion: descripcion ?? null,
-            id_categoria: idCategoriaNum, // puede ser null si no envían categoría
+            id_categoria: idCategoriaNum, 
             precio_compra: precioCompraNum,
             precio_venta: precioVentaNum,
             stock: stockNum,
             stock_minimo: stockMinNum,
-            fecha_vencimiento: fechaISO, // YYYY-MM-DD o null
+            fecha_vencimiento: fechaISO, 
         };
 
         const id = await Producto.createProducto(payload);
         return res.status(201).json({ message: 'Producto creado', id_producto: id });
     } catch (err) {
         console.error(err);
-        // Errores comunes de MySQL/MariaDB
+       
         if (err && (err.code === 'ER_NO_REFERENCED_ROW' || err.code === 'ER_NO_REFERENCED_ROW_2' || /foreign key constraint/i.test(err.sqlMessage || err.message))) {
             return res.status(400).json({ error: 'La categoría especificada no existe (id_categoria inválido)' });
         }
@@ -133,15 +133,12 @@ export async function updateProducto(req, res) {
     const id = parseInt(req.params.id, 10);
     if (!id) return res.status(400).json({ error: 'ID inválido' });
 
-    // obtener producto actual antes de cambios
     const existing = await Producto.findById(id);
     if (!existing) return res.status(404).json({ error: 'Producto no encontrado' });
 
-    // campos permitidos para actualizar
     const allowed = ['nombre_producto', 'descripcion', 'id_categoria', 'precio_compra', 'precio_venta', 'stock', 'stock_minimo', 'fecha_vencimiento', 'estado'];
     const body = req.body || {};
 
-    // Construir payload solo con campos permitidos y normalizar valores
     const payload = {};
     for (const key of allowed) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
@@ -159,7 +156,6 @@ export async function updateProducto(req, res) {
           }
           payload.fecha_vencimiento = fechaISO;
         } else {
-          // nombre_producto, descripcion, estado (permite null / string)
           payload[key] = val === '' ? null : val;
         }
       }
@@ -169,7 +165,6 @@ export async function updateProducto(req, res) {
       return res.status(400).json({ error: 'No hay campos para actualizar' });
     }
 
-    // calcular delta de stock si se envió stock en payload
     const stockBefore = Number(existing.stock ?? 0);
     const willChangeStock = Object.prototype.hasOwnProperty.call(payload, 'stock');
     const newStockVal = willChangeStock ? (payload.stock === null ? null : Number(payload.stock)) : stockBefore;
@@ -189,14 +184,12 @@ export async function updateProducto(req, res) {
         });
       } catch (movErr) {
         console.error('Error creando movimiento por ajuste de stock', movErr);
-        // no bloquear la respuesta principal
       }
     }
 
     return res.status(200).json({ message: 'Producto actualizado' });
   } catch (err) {
     console.error('updateProducto error', err);
-    // errores comunes y respuestas más claras
     const msg = err && (err.sqlMessage || err.message) ? String(err.sqlMessage || err.message) : 'Error al actualizar producto';
     if (/foreign key constraint/i.test(msg) || err.code === 'ER_NO_REFERENCED_ROW' || err.code === 'ER_NO_REFERENCED_ROW_2') {
       return res.status(400).json({ error: 'id_categoria inválido (categoría no existe)' });
@@ -219,7 +212,6 @@ export async function deleteProducto(req, res) {
   } catch (err) {
     console.error('deleteProducto error', err);
 
-    // Errores de FK (MySQL): ER_ROW_IS_REFERENCED_2 / ER_ROW_IS_REFERENCED
     if (err && (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED' || /foreign key/i.test(err.message || err.sqlMessage || ''))) {
       return res.status(400).json({
         error: 'No se puede eliminar el producto porque existen registros relacionados (ventas o movimientos). Elimina o desvincula primero las filas relacionadas en detalle_venta / movimiento_stock.'
@@ -235,11 +227,9 @@ export async function notifyStockMinimum(req, res) {
     const id_producto = req.body?.id_producto ?? (req.query?.id_producto ? Number(req.query.id_producto) : undefined);
     if (!id_producto) return res.status(400).json({ error: 'id_producto required' });
 
-    // usar el modelo en vez de usar pool directamente
     const product = await Producto.findById(Number(id_producto));
     if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
 
-    // SMTP config (soporta SMTP_PASSWORD o SMTP_PASS)
     const smtpHost = process.env.SMTP_HOST;
     const smtpPort = Number(process.env.SMTP_PORT || 587);
     const smtpUser = process.env.SMTP_USER;
@@ -260,7 +250,6 @@ export async function notifyStockMinimum(req, res) {
       tls: { rejectUnauthorized: false }
     });
 
-    // verificar conexión SMTP y reportar error claro
     try {
       await transport.verify();
     } catch (verifyErr) {
@@ -310,15 +299,12 @@ export async function adjustStockController(req, res) {
       return res.status(400).json({ error: 'delta inválido (debe ser número distinto de 0)' });
     }
 
-    // comprobar existencia del producto
     const producto = await Producto.findById(id);
     if (!producto) return res.status(404).json({ error: 'Producto no encontrado' });
 
-    // aplicar ajuste
     const affected = await Producto.adjustStock(id, d);
     if (!affected) return res.status(404).json({ error: 'No se pudo ajustar stock' });
 
-    // crear movimiento de stock correspondiente
     try {
       const movimientoId = await Movimiento.createMovimiento({
         id_producto: id,
@@ -337,13 +323,12 @@ export async function adjustStockController(req, res) {
   }
 }
 
-// Buscar por nombre de producto (segmento URL: /api/productos/buscar/:q)
 export async function searchByNameController(req, res) {
   try {
     const raw = String(req.params.q || '').trim();
     if (!raw) return res.status(400).json({ error: 'Término de búsqueda requerido' });
 
-    // decodificar por si viene con %20
+
     const term = decodeURIComponent(raw);
     console.log('[searchByNameController] term:', term);
 
@@ -358,7 +343,6 @@ export async function searchByNameController(req, res) {
   }
 }
 
-// Buscar por nombre de categoría (segmento URL: /api/productos/categoria/:name)
 export async function productosByCategoriaNameController(req, res) {
   try {
     const name = String(req.params.name || '').trim();
@@ -371,7 +355,6 @@ export async function productosByCategoriaNameController(req, res) {
   }
 }
 
-// Productos por estado (puede aceptar ?page= y ?perPage= para paginar)
 export async function productosByEstadoController(req, res) {
   try {
     const estado = String(req.params.estado || '').trim();
@@ -393,7 +376,6 @@ export async function productosByEstadoController(req, res) {
   }
 }
 
-// Paginación general: /api/productos/paginar?page=1 (perPage opcional, por defecto 10)
 export async function paginarProductosController(req, res) {
   try {
     const page = Math.max(1, Number(req.query.page || 1));
