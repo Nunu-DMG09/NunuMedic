@@ -23,7 +23,7 @@ NUNUMEDIC es un **sistema web Fullstack** diseñado para automatizar la gestión
 ## 🏗️ Arquitectura del Proyecto
 
 ```
-NUNUMED/
+NUNUMEDIC/
 ├── 📁 frontend/          # React + Tailwind CSS + Vite
 │   ├── src/
 │   │   ├── components/   # Componentes reutilizables
@@ -75,7 +75,7 @@ NUNUMED/
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/usuario/nunumedic.git
+git clone https://github.com/usuario/NunuMedic.git
 cd nunumedic
 ```
 
@@ -239,7 +239,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 ## 👨‍💻 Autor
 
 **L. David Mesta**
-- Email: davidmesta@gmail.com
+- Email: davidmesta09@gmail.com
 - GitHub: [@davidmesta](https://github.com/davidmesta)
 
 ## 🖼️ Capturas
