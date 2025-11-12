@@ -490,7 +490,15 @@ export default function VentasForm({ cliente = null }) {
               <div className="flex justify-between"><span className="text-slate-600">Cliente:</span><span className="font-medium">{ventaCreada?.cliente}</span></div>
               <div className="flex flex-col"><span className="text-slate-600">Productos:</span>
                 <div className="font-medium mt-1 text-sm">
-                  {ventaCreada?.itemsNames?.length ? ventaCreada.itemsNames.join(', ') : `${ventaCreada?.items ?? 0} items`}
+                  {ventaCreada?.itemsNames?.length ? (
+                    <ul className="list-disc pl-5 space-y-1">
+                      {ventaCreada.itemsNames.map((nombre, idx) => (
+                        <li key={idx} className="truncate">{nombre}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div>{`${ventaCreada?.items ?? 0} items`}</div>
+                  )}
                 </div>
               </div>
               <div className="flex justify-between border-t border-slate-200 pt-2"><span className="text-slate-600 font-semibold">Total:</span><span className="font-bold">S/. {ventaCreada?.total?.toFixed(2)}</span></div>
