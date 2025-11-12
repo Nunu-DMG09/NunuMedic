@@ -13,23 +13,52 @@ export default function VentasHistorialPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  // paginación
+ 
   const [page, setPage] = useState(1);
   const perPage = 10;
 
   useEffect(() => { fetchVentas(); }, []);
+
+const parseToDate = (v) => {
+  if (!v) return null;
+  try {
+    const s = String(v);
+    let d = new Date(s);
+    if (isNaN(d)) d = new Date(s.replace(' ', 'T'));
+    return isNaN(d) ? null : d;
+  } catch {
+    return null;
+  }
+};
+
+const isSameLocalDay = (dateStr) => {
+  const d = parseToDate(dateStr);
+  if (!d) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear()
+    && d.getMonth() === now.getMonth()
+    && d.getDate() === now.getDate();
+};
 
   async function fetchVentas() {
     setLoading(true);
     try {
       const res = await api.get('/api/ventas/listar');
       const data = res.data?.data || res.data || [];
-      setVentas(Array.isArray(data) ? data : []);
+      const arr = Array.isArray(data) ? data : [];
+      setVentas(arr);
       setPage(1);
+
+     
     } catch (err) {
       console.error('fetchVentas', err);
-      alert('Error cargando ventas');
-      setVentas([]);
+      alert('Error cargando ventas (se usarán datos en caché si existen).');
+      try {
+        
+        setVentas([]);
+      } catch {
+        setVentas([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -179,11 +208,14 @@ export default function VentasHistorialPage() {
 
  
   const totalVentasAmount = filteredVentas.reduce((sum, v) => sum + Number(v.total || 0), 0);
-  const ventasHoy = filteredVentas.filter(v => {
-    const today = new Date().toISOString().split('T')[0];
-    return v.fecha?.startsWith(today);
+
+  
+  const ventasHoyArrFiltered = ventas.filter(v => {
+    const f = v.fecha || v.fecha_venta || v.created_at || v.fecha_creacion || null;
+    return isSameLocalDay(f);
   });
-  const ingresoHoy = ventasHoy.reduce((sum, v) => sum + Number(v.total || 0), 0);
+  const ventasHoy = ventasHoyArrFiltered.length;
+  const ingresoHoy = ventasHoyArrFiltered.reduce((sum, v) => sum + Number(v.total || 0), 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-8">
@@ -237,7 +269,7 @@ export default function VentasHistorialPage() {
                 </div>
                 <div>
                   <div className="text-xs sm:text-sm text-slate-600">Ventas Hoy</div>
-                  <div className="text-lg sm:text-2xl font-bold text-slate-800">{ventasHoy.length}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-slate-800">{ventasHoy}</div>
                 </div>
               </div>
             </div>
