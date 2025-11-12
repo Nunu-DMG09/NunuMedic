@@ -52,95 +52,109 @@ html.light body {
 
 /* ========= TEMA OSCURO ========= */
 html.dark {
-  background-color: #0f172a;
-  color: #f1f5f9;
+  /* capas: base, halos suaves y textura de ruido muy tenue */
+  background-color: #071226;
+  background-image:
+    radial-gradient(circle at 12% 10%, rgba(99,102,241,0.06), transparent 10%),
+    radial-gradient(circle at 92% 88%, rgba(14,165,233,0.035), transparent 12%),
+    linear-gradient(180deg, rgba(2,6,23,0.95) 0%, rgba(5,10,20,0.9) 60%);
+  background-attachment: fixed;
+  color: #e6eef8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* cuerpo mantiene el mismo fondo para evitar "parpadeo" */
 html.dark body {
-  background-color: #0f172a;
-  color: #f1f5f9;
+  background: transparent;
+  color: #e6eef8;
 }
 
-/* Transiciones para elementos específicos en modo oscuro */
-html.dark * {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+/* Subtle vignette + soft noise using SVG data URI (very low opacity) */
+html.dark::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse at center, rgba(0,0,0,0.18), rgba(0,0,0,0) 45%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' fill='%23071226'/><filter id='a'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='120' height='120' filter='url(%23a)' opacity='0.03'/></svg>");
+  mix-blend-mode: multiply;
+  opacity: 1;
+  z-index: 0;
 }
 
-/* Dark mode para inputs y formularios */
-html.dark input,
-html.dark textarea,
-html.dark select {
-  background-color: #1e293b;
-  border-color: #475569;
-  color: #f1f5f9;
-}
-
-html.dark input:focus,
-html.dark textarea:focus,
-html.dark select:focus {
-  border-color: #3b82f6;
-  outline-color: #3b82f6;
-}
-
-/* Dark mode para botones */
-html.dark button {
-  color: #f1f5f9;
-}
-
-/* Dark mode para cards y modales */
+/* Aplicar fondo translúcido y blur a las zonas principales para profundidad */
+html.dark header,
+html.dark nav,
+html.dark main,
 html.dark .bg-white {
-  background-color: #1e293b !important;
+  background-color: rgba(15,23,42,0.55);
+  backdrop-filter: blur(6px) saturate(110%);
+  -webkit-backdrop-filter: blur(6px) saturate(110%);
 }
 
+/* Cards / modals: contraste, bordes suaves y elevación */
+html.dark .bg-white {
+  background-color: #0f1724 !important;
+  border: 1px solid rgba(99,102,241,0.06) !important;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+}
+
+/* Text color tweaks */
 html.dark .text-slate-900,
 html.dark .text-slate-800,
-html.dark .text-slate-700,
-html.dark .text-gray-900,
-html.dark .text-gray-800 {
-  color: #f1f5f9 !important;
+html.dark .text-slate-700 {
+  color: #e6eef8 !important;
 }
 
 html.dark .text-slate-600,
-html.dark .text-slate-500,
-html.dark .text-gray-600,
-html.dark .text-gray-500 {
-  color: #cbd5e1 !important;
+html.dark .text-slate-500 {
+  color: #9fb0c8 !important;
 }
 
-/* Dark mode para bordes */
+/* Accent borders and subtle glows for interactive elements */
 html.dark .border-slate-200,
-html.dark .border-slate-300,
-html.dark .border-gray-200,
-html.dark .border-gray-300 {
-  border-color: #475569 !important;
+html.dark .border-slate-300 {
+  border-color: rgba(99,102,241,0.08) !important;
+}
+html.dark .hover\:bg-blue-50:hover {
+  background-color: rgba(59,130,246,0.06) !important;
+}
+html.dark .text-blue-600 {
+  color: #7cc2ff !important;
 }
 
-/* Scrollbar personalizado */
-::-webkit-scrollbar {
-  width: 6px;
+/* Inputs / selects refined */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #0b1220;
+  border-color: rgba(71,85,105,0.7);
+  color: #e6eef8;
+}
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  border-color: rgba(59,130,246,0.9);
+  box-shadow: 0 6px 18px rgba(59,130,246,0.06);
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+/* Scrollbar más sutil en dark */
+html.dark ::-webkit-scrollbar-track { background: rgba(6,10,18,0.4); }
+html.dark ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.2); border-radius:4px; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.32); }
+
+/* Transiciones un poco más suaves en modo oscuro para evitar saltos perceptibles */
+html.dark * {
+  transition-duration: 280ms;
+  transition-timing-function: cubic-bezier(.2,.8,.2,1);
 }
 
-html.dark ::-webkit-scrollbar-track {
-  background: #1e293b;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-html.dark ::-webkit-scrollbar-thumb {
-  background: #475569;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+/* Pequeñas utilidades */
+html.dark .card-elevated {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 12px;
+  padding: 0.75rem;
+  box-shadow: 0 8px 24px rgba(2,6,23,0.55);
 }

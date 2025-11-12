@@ -11,7 +11,7 @@ export async function createVenta({ id_usuario = null, id_cliente = null, total,
     );
     const id_venta = ventaRes.insertId;
 
-    // insertar detalle_venta y ajustar stock por cada item
+  
     for (const it of items) {
       const { id_producto, cantidad, precio_unitario } = it;
       await conn.query(
@@ -19,13 +19,13 @@ export async function createVenta({ id_usuario = null, id_cliente = null, total,
         [id_venta, id_producto, cantidad, precio_unitario]
       );
 
-      // actualizar stock (resta)
+     
       await conn.query(
         `UPDATE producto SET stock = GREATEST(0, stock - ?) WHERE id_producto = ?`,
         [cantidad, id_producto]
       );
 
-      // registrar movimiento_stock tipo 'salida'
+     
       await conn.query(
         `INSERT INTO movimiento_stock (id_producto, tipo, cantidad, descripcion) VALUES (?, 'salida', ?, ?)`,
         [id_producto, cantidad, `Venta #${id_venta}`]
@@ -52,7 +52,7 @@ export async function findById(id_venta) {
 }
 
 export async function findAll() {
-  // detectar columna de fecha en la tabla 'venta'
+ 
   const [cols] = await pool.query(
     'SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?',
     [process.env.DB_NAME, 'venta']
@@ -83,7 +83,6 @@ export async function findAll() {
 
   const [ventas] = await pool.query(sql);
 
-  // Cargar items de detalle_venta para cada venta
   for (const venta of ventas) {
     const [items] = await pool.query(
       `SELECT dv.*, p.nombre_producto
