@@ -375,7 +375,7 @@ export default function VentasForm({ cliente = null }) {
                       <input type="number" step="0.01" min="0" value={pagoEfectivo} onChange={e => setPagoEfectivo(e.target.value)} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl" />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-600">Pago móvil (Yape / Plin)</label>
+                      <label className="text-xs text-slate-600">Pago móvil / tarjeta</label>
                       <input type="number" step="0.01" min="0" value={pagoYape} onChange={e => setPagoYape(e.target.value)} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl" />
                     </div>
                   </div>
@@ -502,7 +502,7 @@ export default function VentasForm({ cliente = null }) {
                 </div>
               </div>
               <div className="flex justify-between border-t border-slate-200 pt-2"><span className="text-slate-600 font-semibold">Total:</span><span className="font-bold">S/. {ventaCreada?.total?.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-slate-600">Pagos:</span><span className="font-medium">E: S/. {(ventaCreada?.pagos?.efectivo ?? 0).toFixed(2)} • Y: S/. {(ventaCreada?.pagos?.yape ?? 0).toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-slate-600">Pagos:</span><span className="font-medium">E: S/. {(ventaCreada?.pagos?.efectivo ?? 0).toFixed(2)} • V: S/. {(ventaCreada?.pagos?.yape ?? 0).toFixed(2)}</span></div>
               <div className="flex justify-between"><span className="text-slate-600">Vuelto:</span><span className="font-medium">S/. {(ventaCreada?.vuelto ?? 0).toFixed(2)}</span></div>
             </div>
 
