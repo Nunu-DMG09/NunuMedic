@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "npx knex migrate:latest --knexfile knexfile.cjs",
     "rollback": "npx knex migrate:rollback --knexfile knexfile.cjs",
-    "seed": "npx knex seed:run --knexfile knexfile.cjs"
+    "seed": "npx knex seed:run --knexfile knexfile.cjs",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -19,11 +21,11 @@
     "express": "5.1.0",
     "jsonwebtoken": "9.0.2",
     "mysql2": "3.15.2",
-    "nodemailer": "^7.0.9",
-    "nodemon": "3.1.10"
+    "nodemailer": "^7.0.9"
   },
   "description": "",
   "devDependencies": {
-    "knex": "^3.1.0"
+    "knex": "^3.1.0",
+    "nodemon": "3.1.11"
   }
 }

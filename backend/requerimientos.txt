@@ -7,3 +7,4 @@ npm install bcryptjs jsonwebtoken
 npm install nodemailer --save
 npm install --save-dev knex
 npm install --save mysql2
+npm install --save-dev nodemon
