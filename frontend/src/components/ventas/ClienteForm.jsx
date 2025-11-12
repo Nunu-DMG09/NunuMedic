@@ -9,6 +9,7 @@ export default function ClienteForm({ onCreated }) {
 
   const [checking, setChecking] = useState(false);
   const [checkMessage, setCheckMessage] = useState('');
+  const [checkStatus, setCheckStatus] = useState(''); 
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -49,6 +50,7 @@ export default function ClienteForm({ onCreated }) {
     if (!dni) return setCheckMessage('Ingresa un DNI para verificar');
     setChecking(true);
     setCheckMessage('');
+    setCheckStatus('');
     try {
       let found = null;
       try {
@@ -69,13 +71,16 @@ export default function ClienteForm({ onCreated }) {
         setNombre(found.nombre ?? found.nombres ?? '');
         setApellido(found.apellido ?? found.apellidos ?? '');
         setCheckMessage(`Cliente encontrado: ${found.nombre ?? ''} ${found.apellido ?? ''}`);
+        setCheckStatus('success');
         if (typeof onCreated === 'function') onCreated(found);
       } else {
         setCheckMessage('No existe un cliente con ese DNI. Debes registrarlo.');
+        setCheckStatus('error');
       }
     } catch (err) {
       console.error('Error verificando DNI', err);
       setCheckMessage('Error verificando DNI');
+      setCheckStatus('error');
     } finally {
       setChecking(false);
     }
@@ -110,7 +115,7 @@ export default function ClienteForm({ onCreated }) {
                 <input
                   type="text"
                   value={dni}
-                  onChange={e => { setDni(e.target.value); setCheckMessage(''); }}
+                  onChange={e => { setDni(e.target.value); setCheckMessage(''); setCheckStatus(''); }}
                   maxLength={8}
                   placeholder="Ingresa el DNI (8 dígitos)"
                   className="w-full pl-10 pr-24 py-3 sm:py-4 border-2 border-slate-200 rounded-xl bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200"
@@ -126,7 +131,11 @@ export default function ClienteForm({ onCreated }) {
                   </button>
                 </div>
               </div>
-              {checkMessage && <div className="mt-2 text-sm text-slate-600">{checkMessage}</div>}
+              {checkMessage && (
+                <div className={`mt-2 text-sm ${checkStatus === 'error' ? 'text-red-600' : 'text-slate-600'}`}>
+                  {checkMessage}
+                </div>
+              )}
             </div>
 
             <div>
