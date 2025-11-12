@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import useAuth from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
 
 const Icon = {
   Dashboard: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z" stroke="currentColor" strokeWidth="1.5"/></svg>,
@@ -56,7 +57,7 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     fetchLowStock();
-    pollingRef.current = setInterval(fetchLowStock, 6000);
+    pollingRef.current = setInterval(fetchLowStock, 1000);
     return () => clearInterval(pollingRef.current);
   }, []);
 
@@ -87,6 +88,7 @@ export default function DashboardLayout() {
   ];
 
   const { logout, token } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -244,9 +246,30 @@ export default function DashboardLayout() {
               </div>
             </div>
             
-            {/* Right side - Actions */}
+          
             <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
-              {/* Notifications (low stock) */}
+          
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition flex items-center justify-center"
+                title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                aria-label="Alternar tema"
+              >
+                {isDark ? (
+                  
+                  <svg className="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 4V2M12 22v-2M4.93 4.93L3.5 3.5M20.5 20.5l-1.43-1.43M4 12H2M22 12h-2M4.93 19.07l-1.43 1.43M20.5 3.5L19.07 4.93" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="4" strokeWidth="1.6"/>
+                  </svg>
+                ) : (
+                 
+                  <svg className="w-5 h-5 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+
+             
               <div className="relative">
                 <button
                   onClick={toggleNotifications}
@@ -254,7 +277,7 @@ export default function DashboardLayout() {
                   aria-label="Notificaciones de stock"
                   title="Notificaciones de stock"
                 >
-                  {/* Icono de campana */}
+              
                   <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" viewBox="0 0 24 24" fill="none" aria-hidden>
                     <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v0.68C7.64 5.36 6 7.93 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h11z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -266,63 +289,9 @@ export default function DashboardLayout() {
                    )}
                  </button>
 
-                 {showNotifications && (
-                   <div className="absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-lg shadow-xl border border-slate-200 z-50">
-                     <div className="p-3 border-b border-slate-100 flex items-center justify-between">
-                       <div className="font-semibold text-sm sm:text-base">Alertas de stock</div>
-                       <button
-                         onClick={() => {
-                         
-                           (lowStockProducts || []).forEach(p => acknowledgedRef.current.add(String(p.id_producto ?? p.id)));
-                           setUnseenCount(0);
-                           setShowNotifications(false);
-                         }}
-                         className="text-xs sm:text-sm text-slate-500 hover:text-slate-700"
-                       >
-                         Marcar todas
-                       </button>
-                     </div>
-                     <div className="max-h-64 overflow-auto">
-                       {lowStockProducts.length === 0 ? (
-                         <div className="p-4 text-xs sm:text-sm text-slate-500">No hay productos con stock en o por debajo del mínimo.</div>
-                       ) : (
-                         lowStockProducts.map(p => {
-                           const id = p.id_producto ?? p.id ?? String(p._id ?? '');
-                           const name = p.nombre || p.nombre_producto || p.nombreProducto || 'Sin nombre';
-                           const seen = acknowledgedRef.current.has(String(id));
-                          
-                           const initials = name.split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
-                           return (
-                             <div key={id} className="p-3 flex items-center justify-between hover:bg-slate-50">
-                               <div className="flex items-center gap-3">
-                                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-100 rounded-md flex items-center justify-center">
-                                   <span className="text-slate-600 font-semibold text-xs sm:text-sm">{initials}</span>
-                                 </div>
-                                 <div className="flex-1 min-w-0">
-                                   <div className="text-xs sm:text-sm font-semibold text-slate-800 truncate">{name}</div>
-                                   <div className="text-xs text-slate-500">Stock: <span className="font-medium text-slate-700">{p.stock}</span> • Min: {p.stock_minimo}</div>
-                                 </div>
-                               </div>
-                               <div className="flex flex-col items-end gap-1 sm:gap-2">
-                                 {!seen ? <span className="text-xs bg-red-100 text-red-700 px-1 sm:px-2 py-1 rounded">Nuevo</span> : <span className="text-xs text-slate-400">Visto</span>}
-                                 <div className="flex gap-1 sm:gap-2">
-                                   <button onClick={() => { acknowledgeProduct(id); }} className="px-1 sm:px-2 py-1 text-xs bg-slate-100 rounded hover:bg-slate-200">Marcar</button>
-                                   <button onClick={() => handleGoToInventario(id)} className="px-1 sm:px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">Ver</button>
-                                 </div>
-                               </div>
-                             </div>
-                           );
-                         })
-                       )}
-                     </div>
-                     <div className="p-3 border-t border-slate-100 text-xs text-slate-500">
-                       Actualización automática cada 6s.
-                     </div>
-                   </div>
-                 )}
-               </div>
-              
-             
+               
+                </div>              
+               
               <button
                 onClick={openLogoutModal}
                 className="px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm text-red-600 bg-red-50 hover:bg-red-100 transition"
@@ -386,61 +355,101 @@ export default function DashboardLayout() {
       )}
 
      
-      {showNotifications && lowStockProducts.length > 0 && (
+      {showNotifications && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={toggleNotifications} />
           <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
-            <h3 className="text-lg font-semibold mb-4">Productos con stock bajo</h3>
-            <div className="max-h-60 overflow-y-auto mb-4">
-              {lowStockProducts.map(product => {
-                const id = product.id_producto ?? product.id ?? String(product._id ?? '');
-                const name = product.nombre || product.nombre_producto || product.nombreProducto || 'Sin nombre';
-                const initials = name.split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
-                return (
-                  <div key={id} className="flex items-center justify-between py-2 border-b border-slate-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-slate-100 rounded-md flex items-center justify-center">
-                        <span className="text-slate-600 font-semibold text-sm">{initials}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-slate-800 font-semibold">{name}</span>
-                        <span className="text-slate-500 text-sm">{`Stock: ${product.stock} • Mínimo: ${product.stock_minimo}`}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => { acknowledgeProduct(id); }}
-                        className="px-3 py-1 rounded-md bg-slate-100 text-slate-700 text-sm hover:bg-slate-200 transition"
-                      >
-                        Marcar
-                      </button>
-                      <button
-                        onClick={() => handleGoToInventario(id)}
-                        className="px-3 py-1 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
-                      >
-                        Ir a inventario
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex justify-end gap-3">
+            <div className="flex items-start justify-between">
+              <h3 className="text-lg font-semibold">Alertas de stock</h3>
               <button
                 onClick={toggleNotifications}
-                className="px-4 py-2 rounded-md bg-gray-100 text-slate-700 hover:bg-gray-200 transition"
+                aria-label="Cerrar"
+                className="text-slate-400 hover:text-slate-600"
               >
-                Ignorar
+                ✕
               </button>
-              <button
-                onClick={() => {
-                  lowStockProducts.forEach(product => acknowledgeProduct(product.id_producto ?? product.id));
-                  toggleNotifications();
-                }}
-                className="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 transition"
-              >
-                Marcar como visto
-              </button>
+            </div>
+
+            <div className="mt-4">
+              {lowStockProducts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M13 16h-1v-4h-1" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M12 18v.01" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M21 12a9 9 0 1 1-6.219-8.58" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-slate-800">No hay productos con stock bajo</div>
+                  </div>
+
+                  <div className="mt-6 flex gap-3">
+                    <button
+                      onClick={toggleNotifications}
+                      className="px-4 py-2 rounded-md bg-gray-100 text-slate-700 hover:bg-gray-200 transition"
+                    >
+                      Cerrar
+                    </button>
+                    <button
+                      onClick={() => { navigate('/inventario'); setShowNotifications(false); }}
+                      className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                    >
+                      Ver inventario
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="max-h-64 overflow-auto rounded-md border border-slate-100 p-1">
+                    {lowStockProducts.map(product => {
+                      const id = product.id_producto ?? product.id ?? String(product._id ?? '');
+                      const name = product.nombre || product.nombre_producto || product.nombreProducto || 'Sin nombre';
+                      const initials = name.split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+                      const seen = acknowledgedRef.current.has(String(id));
+                      return (
+                        <div key={id} className="p-3 flex items-center justify-between hover:bg-slate-50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-100 rounded-md flex items-center justify-center">
+                              <span className="text-slate-600 font-semibold text-xs sm:text-sm">{initials}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm sm:text-base font-semibold text-slate-800 truncate">{name}</div>
+                              <div className="text-xs text-slate-500">Stock: <span className="font-medium text-slate-700">{product.stock}</span> • Min: {product.stock_minimo}</div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-2">
+                            {!seen ? <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">Nuevo</span> : <span className="text-xs text-slate-400">Visto</span>}
+                            <div className="flex gap-2">
+                              <button onClick={() => { acknowledgeProduct(id); }} className="px-2 py-1 text-xs bg-slate-100 rounded hover:bg-slate-200">Marcar</button>
+                              <button onClick={() => handleGoToInventario(id)} className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">Ir</button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-4 flex justify-end gap-3">
+                    <button
+                      onClick={toggleNotifications}
+                      className="px-4 py-2 rounded-md bg-gray-100 text-slate-700 hover:bg-gray-200 transition"
+                    >
+                      Ignorar
+                    </button>
+                    <button
+                      onClick={() => {
+                        lowStockProducts.forEach(product => acknowledgeProduct(product.id_producto ?? product.id));
+                        toggleNotifications();
+                      }}
+                      className="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 transition"
+                    >
+                      Marcar como visto
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

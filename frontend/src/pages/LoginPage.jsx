@@ -25,7 +25,7 @@ export default function LoginPage() {
       if (response.status === 200 && response.data?.user) {
         const { user, token } = response.data;
         login(user, token || null);
-        setSuccess('¡Bienvenido! Redirigiendo al dashboard...');
+        setSuccess('¡Bienvenido! Redirigiendo al panel administrativo...');
         setTimeout(() => navigate('/dashboard'), 1000);
         return;
       }
