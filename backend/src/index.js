@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // health
 app.get("/", (req, res) => {
-  res.status(200).json({ ok: true, service: "NUNUFHARMA API" });
+  res.status(200).json({ ok: true, service: "BIENVENIDOS A NUNUMEDIC" });
 });
 
 // rutas API
@@ -38,5 +38,5 @@ app.use('/api/auth', authRoute);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
