@@ -11,7 +11,7 @@ export async function findByUsername(usuario) {
 }
 
 export async function createUsuario({ nombre, apellido, dni, telefono, email, usuario, clave, rol = 'admin' }) {
-  // la 'clave' debe llegar ya hasheada desde el controlador
+ 
   const [result] = await pool.query(
     `INSERT INTO usuario (nombre, apellido, dni, telefono, email, usuario, clave, rol)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,

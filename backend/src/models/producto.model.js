@@ -8,7 +8,7 @@ export async function findAll() {
      ORDER BY p.id_producto DESC`
   );
 
-  // añadir objeto categoria para cada fila
+
   return rows.map(r => ({
     ...r,
     categoria_nombre: r.categoria_nombre ?? null,
@@ -140,7 +140,7 @@ export async function findPaginated({ page = 1, perPage = 10, search = null, cat
     params.push(q, q);
   }
   if (categoria) {
-    // acepta id o nombre (si es numérico se usa id, sino nombre LIKE)
+    
     if (!isNaN(Number(categoria))) {
       where.push('p.id_categoria = ?');
       params.push(Number(categoria));
