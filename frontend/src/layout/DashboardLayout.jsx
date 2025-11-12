@@ -14,7 +14,6 @@ const Icon = {
 };
 
 export default function DashboardLayout() {
-  // notificaciones de stock bajo
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unseenCount, setUnseenCount] = useState(0); 
@@ -133,18 +132,18 @@ export default function DashboardLayout() {
       <nav className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-50 md:z-auto w-28 h-full bg-white shadow-xl border-r border-slate-200/60 flex flex-col items-center py-8 transition-transform duration-300`}>
         <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600"></div>
         
-        {/* Logo */}
+       
         <div className="mb-10">
           <button
             onClick={() => navigate('/dashboard')}
-            title="Ir a Administradores"
+            title="Ir a Dashboard"
             className="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg focus:outline-none"
           >
             <span className="text-white font-bold text-xl select-none">NU</span>
           </button>
         </div>
         
-        {/* Menu Items */}
+       
         <div className="flex flex-col gap-3 w-full px-3">
           {menuItems.map(item => (
             <NavLink
@@ -168,7 +167,7 @@ export default function DashboardLayout() {
           ))}
         </div>
 
-        {/* Version */}
+        
         <div className="mt-auto text-xs text-slate-400 font-medium">v2.0</div>
       </nav>
 
@@ -191,11 +190,11 @@ export default function DashboardLayout() {
 
               <div>
                 <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                  <span className="hidden sm:inline">NUNUMEDIC - Dashboard</span>
+                  <span className="hidden sm:inline">NUNUMEDIC - Panel Administrativo</span>
                   <span className="sm:hidden">NUNUMEDIC</span>
                 </h1>
                 <p className="text-slate-600 text-xs sm:text-sm md:text-base mt-1 hidden sm:block">
-                  Panel de control administrativo
+                  Gestionamiento integral de ventas e inventario
                 </p>
               </div>
             </div>
@@ -228,7 +227,7 @@ export default function DashboardLayout() {
                        <div className="font-semibold text-sm sm:text-base">Alertas de stock</div>
                        <button
                          onClick={() => {
-                           // marcar todas las actuales como vistas
+                         
                            (lowStockProducts || []).forEach(p => acknowledgedRef.current.add(String(p.id_producto ?? p.id)));
                            setUnseenCount(0);
                            setShowNotifications(false);
@@ -246,7 +245,7 @@ export default function DashboardLayout() {
                            const id = p.id_producto ?? p.id ?? String(p._id ?? '');
                            const name = p.nombre || p.nombre_producto || p.nombreProducto || 'Sin nombre';
                            const seen = acknowledgedRef.current.has(String(id));
-                           // mostrar nombre explícitamente; reemplazar icono por iniciales
+                          
                            const initials = name.split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
                            return (
                              <div key={id} className="p-3 flex items-center justify-between hover:bg-slate-50">
@@ -278,7 +277,7 @@ export default function DashboardLayout() {
                  )}
                </div>
               
-              {/* Botón abrir modal logout */}
+             
               <button
                 onClick={openLogoutModal}
                 className="px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm text-red-600 bg-red-50 hover:bg-red-100 transition"
@@ -288,7 +287,7 @@ export default function DashboardLayout() {
                 <span className="sm:hidden">Salir</span>
               </button>
 
-              {/* User Profile (navegar a AdminsPage al clicar) */}
+             
               <button
                 onClick={() => navigate('/admins')}
                 className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2 sm:py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50 hover:shadow-md transition-colors focus:outline-none"
@@ -308,13 +307,13 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* CONTENT AREA - Aquí se renderiza el contenido de cada página */}
+      
         <main className="flex-1 overflow-auto">
           <Outlet />
         </main>
       </div>
 
-      {/* Logout Confirmation Modal */}
+   
       {isLogoutModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={closeLogoutModal} />
@@ -341,7 +340,7 @@ export default function DashboardLayout() {
         </div>
       )}
 
-      {/* Low Stock Notifications */}
+     
       {showNotifications && lowStockProducts.length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={toggleNotifications} />
