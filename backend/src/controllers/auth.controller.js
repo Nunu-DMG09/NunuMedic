@@ -31,7 +31,7 @@ export async function login(req, res) {
                 { expiresIn: '8h' }
             );
         } catch (e) {
-            // si no está jsonwebtoken instalado o falla, no interrumpe el login
+          
             console.error('JWT error:', e.message || e);
         }
 
@@ -48,7 +48,7 @@ export function logout(req, res) {
   try {
     const auth = req.headers.authorization || req.body?.token || req.query?.token;
     if (!auth) {
-      // no token -> igualmente responder ok (cliente debe limpiar)
+    
       return res.status(200).json({ message: 'Cierre de sesión OK' });
     }
     const token = auth.startsWith('Bearer ') ? auth.split(' ')[1] : auth;
@@ -63,12 +63,11 @@ export function logout(req, res) {
   }
 }
 
-// Helper para comprobar si un token fue revocado
+
 export function isTokenRevoked(token) {
   return revokedTokens.has(token);
 }
 
-// Opcional: función para revocar manualmente
 export function revokeToken(token) {
   if (token) revokedTokens.add(token);
 }
