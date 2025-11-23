@@ -49,6 +49,11 @@ export async function updateClave(id, hashedClave) {
   return result.affectedRows;
 }
 
+export async function updateEstado(id, estado) {
+  const [result] = await pool.query('UPDATE usuario SET estado = ? WHERE id_usuario = ?', [estado, id]);
+  return result.affectedRows;
+}
+
 export async function deleteById(id) {
   const [result] = await pool.query('DELETE FROM usuario WHERE id_usuario = ?', [id]);
   return result.affectedRows;
