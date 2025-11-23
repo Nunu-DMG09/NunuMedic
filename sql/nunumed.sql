@@ -231,7 +231,7 @@ CREATE TABLE `usuario` (
   `email` varchar(100) DEFAULT NULL,
   `usuario` varchar(50) NOT NULL,
   `clave` varchar(255) NOT NULL,
-  `rol` enum('super_admin','admin') NOT NULL,
+  `rol` enum('super_admin','admin', 'vendedor') NOT NULL,
   `estado` enum('activo','inactivo') DEFAULT 'activo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
