@@ -103,3 +103,27 @@ export async function deleteUsuario(req, res) {
     return res.status(500).json({ error: 'Error al eliminar usuario' });
   }
 }
+
+// Nuevo: actualizar estado
+export async function updateUsuarioEstado(req, res) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    let { estado } = req.body;
+    if (!id || typeof estado === 'undefined') return res.status(400).json({ error: 'ID y estado son requeridos' });
+
+    estado = String(estado).toLowerCase();
+    if (!['activo','inactivo','1','0','true','false'].includes(estado)) {
+      return res.status(400).json({ error: 'Estado inválido' });
+    }
+
+    const normalized = ['activo','1','true'].includes(estado) ? 'activo' : 'inactivo';
+
+    const affected = await Usuario.updateEstado(id, normalized);
+    if (!affected) return res.status(404).json({ error: 'Usuario no encontrado o sin cambios' });
+
+    return res.status(200).json({ message: 'Estado actualizado', estado: normalized });
+  } catch (err) {
+    console.error('updateUsuarioEstado error', err);
+    return res.status(500).json({ error: 'Error al actualizar estado' });
+  }
+}
