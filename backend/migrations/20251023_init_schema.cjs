@@ -44,7 +44,7 @@ exports.up = async function(knex) {
     table.string('email', 100).nullable().unique();
     table.string('usuario', 50).notNullable().unique();
     table.string('clave', 255).notNullable();
-    table.enu('rol', ['super_admin','admin']).notNullable();
+    table.enu('rol', ['super_admin','admin','vendedor']).notNullable(); 
     table.enu('estado', ['activo','inactivo']).defaultTo('activo');
   });
 
