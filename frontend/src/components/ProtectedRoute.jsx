@@ -1,13 +1,34 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
+import { ROLES } from '../filters/roles';
 
-export default function ProtectedRoute({ redirectTo = '/login', children }) {
-  const { user, token } = useAuth(); 
-    
-  if (!user && !token) {
-    return <Navigate to={redirectTo} replace />;
+export default function ProtectedRoute({ children, allowedRoles = [] }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-sm text-slate-600">Cargando...</div>
+      </div>
+    );
   }
 
-  return children ? children : <Outlet />;
+ 
+  if (!user) return <Navigate to="/login" replace />;
+
+ 
+  if (!Array.isArray(allowedRoles) || allowedRoles.length === 0) {
+    return children ?? <Outlet />;
+  }
+
+ 
+  if (!allowedRoles.includes(user.rol)) {
+    // redirigir según rol a una página segura
+    if (user.rol === ROLES.VENDEDOR) return <Navigate to="/ventas" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  
+  return children ?? <Outlet />;
 }
