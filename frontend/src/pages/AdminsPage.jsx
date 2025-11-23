@@ -99,13 +99,33 @@ export default function AdminsPage() {
   const totalRoles = [...new Set(admins.map(u => u.rol))].length;
   const superAdmins = admins.filter(u => u.rol === 'super_admin').length;
 
+  const availableRoles = useMemo(() => {
+    const setRoles = new Set(admins.map(u => (u.rol || '').trim()).filter(Boolean));
+    const arr = Array.from(setRoles);
+    // ensure core roles are always present (incl. 'vendedor')
+    ['super_admin', 'admin', 'vendedor'].forEach(r => { if (!arr.includes(r)) arr.push(r); });
+    // prefer a stable ordering: super_admin, admin, vendedor, then the rest alphabetically
+    const order = ['super_admin', 'admin', 'vendedor'];
+    arr.sort((a, b) => {
+      const ia = order.indexOf(a), ib = order.indexOf(b);
+      if (ia === -1 && ib === -1) return a.localeCompare(b);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+    return arr;
+  }, [admins]);
+  
+  // role options for the filter (always include 'vendedor')
+  const roleOptions = useMemo(() => {
+    return [...new Set([...(admins.map(u => u.rol || '').filter(Boolean)), 'super_admin', 'admin', 'vendedor'])];
+  }, [admins]);
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
         <AdminsHeader />
-        <div className="mt-4 flex justify-end gap-2">
-          <button onClick={() => setCreateModalOpen(true)} className="px-4 py-2 bg-green-600 text-white rounded-xl shadow">Nuevo Administrador</button>
-        </div>
+
         {/* Modales */}
         {passwordModalUser && (
           <EditPasswordModal
@@ -119,6 +139,7 @@ export default function AdminsPage() {
           <EditRoleModal
             open={!!roleModalUser}
             user={roleModalUser}
+            roles={availableRoles}
             onClose={() => setRoleModalUser(null)}
             onSaved={onModalSaved}
           />
@@ -134,6 +155,7 @@ export default function AdminsPage() {
         {createModalOpen && (
           <CreateAdminModal
             open={createModalOpen}
+            roles={availableRoles}
             onClose={() => setCreateModalOpen(false)}
             onCreated={() => { setCreateModalOpen(false); fetchAdmins(); }}
           />
@@ -206,7 +228,7 @@ export default function AdminsPage() {
           </div>
         </div>
 
-        {/* Main */}
+        {/* Main (table/filter) - unchanged aside from action buttons order */}
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 overflow-hidden">
           {/* Header */}
           <div className="p-4 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -217,7 +239,7 @@ export default function AdminsPage() {
                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
                   </svg>
                 </div>
-                Lista de Administradores
+                Lista de Usuarios
               </h3>
               <div className="text-xs sm:text-sm text-slate-600 mt-1">Mostrando <span className="font-semibold">{paginatedAdmins.length}</span> de <span className="font-semibold">{totalItems}</span> usuarios</div>
             </div>
@@ -233,6 +255,13 @@ export default function AdminsPage() {
                 </svg>
                 <span className="ml-2">{loading ? 'Actualizando...' : 'Actualizar'}</span>
               </button>
+              <button
+                  onClick={() => setCreateModalOpen(true)}
+                  className="hidden sm:inline px-4 py-2 bg-green-600 text-white rounded-xl shadow hover:shadow-lg transition"
+                  title="Crear nuevo usuario"
+                >
+                  Nuevo usuario
+                </button>
             </div>
           </div>
 
@@ -265,7 +294,7 @@ export default function AdminsPage() {
                   className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl bg-white text-slate-800"
                 >
                   <option value="">Todos los roles</option>
-                  {[...new Set(admins.map(u => u.rol))].map(rol => (
+                  {roleOptions.map(rol => (
                     <option key={rol} value={rol}>{rol}</option>
                   ))}
                 </select>
@@ -312,11 +341,11 @@ export default function AdminsPage() {
               <tbody className="bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="p-12 text-center">Cargando administradores...</td>
+                    <td colSpan={6} className="p-12 text-center">Cargando usuarios...</td>
                   </tr>
                 ) : paginatedAdmins.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-12 text-center">No hay administradores</td>
+                    <td colSpan={6} className="p-12 text-center">No hay usuarios</td>
                   </tr>
                 ) : (
                   paginatedAdmins.map((u, idx) => (
@@ -346,6 +375,7 @@ export default function AdminsPage() {
                         <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
                           u.rol === 'super_admin' ? 'bg-purple-100 text-purple-800 border border-purple-200'
                           : u.rol === 'admin' ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                          : u.rol === 'vendedor' ? 'bg-amber-100 text-amber-800 border border-amber-200'
                           : 'bg-gray-100 text-gray-800 border border-gray-200'
                         }`}>
                           {u.rol}
@@ -359,36 +389,27 @@ export default function AdminsPage() {
 
                       <td className="px-6 py-4 text-center">
                         <div className="inline-flex items-center gap-2">
+                          {/* lock (clave) */}
                           <button
                             onClick={() => handleChangeClave(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_clave`]}
                             title="Editar clave"
                             className="p-2 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700"
                           >
-                            {/* lock icon */}
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                           </button>
 
+                          {/* role */}
                           <button
                             onClick={() => handleChangeRole(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_rol`]}
                             title="Editar rol"
                             className="p-2 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700"
                           >
-                            {/* role icon */}
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10z"/><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/></svg>
                           </button>
 
-                          <button
-                            onClick={() => handleDelete(u)}
-                            disabled={!!actionLoading[`${u.id_usuario}_del`]}
-                            title="Eliminar usuario"
-                            className="p-2 rounded-md bg-red-50 hover:bg-red-100 text-red-600"
-                          >
-                            {/* trash icon */}
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-                          </button>
-
+                          {/* state (beside role) */}
                           <button
                             onClick={() => handleChangeEstado(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_estado`]}
@@ -399,6 +420,16 @@ export default function AdminsPage() {
                               <path d="M12 2v6" /><path d="M5 9l7 7 7-7"/>
                             </svg>
                           </button>
+
+                          {/* delete at the end */}
+                          <button
+                            onClick={() => handleDelete(u)}
+                            disabled={!!actionLoading[`${u.id_usuario}_del`]}
+                            title="Eliminar usuario"
+                            className="p-2 rounded-md bg-red-50 hover:bg-red-100 text-red-600"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -408,12 +439,12 @@ export default function AdminsPage() {
             </table>
           </div>
 
-        
+          {/* mobile list (same button order) */}
           <div className="sm:hidden divide-y divide-slate-200">
             {loading ? (
-              <div className="p-6 text-center text-slate-500">Cargando administradores...</div>
+              <div className="p-6 text-center text-slate-500">Cargando usuarios...</div>
             ) : paginatedAdmins.length === 0 ? (
-              <div className="p-6 text-center text-slate-500">No hay administradores</div>
+              <div className="p-6 text-center text-slate-500">No hay usuarios</div>
             ) : paginatedAdmins.map(u => (
               <div key={u.id_usuario} className="p-4">
                 <div className="flex items-start justify-between gap-3">
@@ -434,19 +465,22 @@ export default function AdminsPage() {
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
                       <span className="px-2 py-1 bg-blue-50 text-slate-700 rounded-full">Email: {u.email || '—'}</span>
                       <span className="px-2 py-1 bg-slate-50 text-slate-600 rounded-full">Tel: {u.telefono || '—'}</span>
-                      <span className="px-2 py-1 rounded-full text-xs font-medium ${
-                        u.rol === 'super_admin' ? 'bg-purple-100 text-purple-800' : u.rol === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                      }">Rol: {u.rol}</span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.estado === 'activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>Estado: {u.estado}</span>
-                    </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        u.rol === 'super_admin' ? 'bg-purple-100 text-purple-800'
+                        : u.rol === 'admin' ? 'bg-blue-100 text-blue-800'
+                        : u.rol === 'vendedor' ? 'bg-amber-100 text-amber-800'
+                        : 'bg-gray-100 text-gray-800'
+                      }`}>Rol: {u.rol}</span>
+                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.estado === 'activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>Estado: {u.estado}</span>
+                     </div>
                   </div>
 
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex gap-2">
                       <button onClick={() => handleChangeClave(u)} disabled={!!actionLoading[`${u.id_usuario}_clave`]} className="px-3 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">Clave</button>
                       <button onClick={() => handleChangeRole(u)} disabled={!!actionLoading[`${u.id_usuario}_rol`]} className="px-3 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">Rol</button>
-                      <button onClick={() => handleDelete(u)} disabled={!!actionLoading[`${u.id_usuario}_del`]} className="px-3 py-1 bg-red-100 text-red-700 rounded-md text-xs">Eliminar</button>
                       <button onClick={() => handleChangeEstado(u)} disabled={!!actionLoading[`${u.id_usuario}_estado`]} className="px-3 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">Estado</button>
+                      <button onClick={() => handleDelete(u)} disabled={!!actionLoading[`${u.id_usuario}_del`]} className="px-3 py-1 bg-red-100 text-red-700 rounded-md text-xs">Eliminar</button>
                     </div>
                   </div>
                 </div>
@@ -454,7 +488,7 @@ export default function AdminsPage() {
             ))}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination (unchanged) */}
           <div className="p-4 sm:p-6 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="text-sm text-slate-600">Página <span className="font-semibold">{page}</span> de <span className="font-semibold">{totalPages}</span> — Total: <span className="font-semibold">{totalItems}</span></div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -477,7 +511,7 @@ export default function AdminsPage() {
           </div>
         </div>
 
-        {/* Mobile quick actions */}
+        {/* Mobile quick actions (unchanged) */}
         <div className="fixed bottom-4 left-0 right-0 z-40 px-4 sm:hidden">
           <div className="max-w-3xl mx-auto bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl p-3 flex gap-3">
             <button onClick={fetchAdmins} className="flex-1 bg-purple-600 text-white py-2 rounded-lg font-semibold">Actualizar</button>
