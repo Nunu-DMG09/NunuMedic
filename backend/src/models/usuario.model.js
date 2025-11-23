@@ -37,3 +37,19 @@ export async function findByRoles(roles = []) {
   const [rows] = await pool.query(`SELECT id_usuario, nombre, apellido, dni, telefono, email, usuario, rol, estado FROM usuario WHERE rol IN (${placeholders}) ORDER BY id_usuario ASC`, roles);
   return rows;
 }
+
+// Nuevas funciones para actualizar rol, clave y eliminar usuario
+export async function updateRole(id, rol) {
+  const [result] = await pool.query('UPDATE usuario SET rol = ? WHERE id_usuario = ?', [rol, id]);
+  return result.affectedRows;
+}
+
+export async function updateClave(id, hashedClave) {
+  const [result] = await pool.query('UPDATE usuario SET clave = ? WHERE id_usuario = ?', [hashedClave, id]);
+  return result.affectedRows;
+}
+
+export async function deleteById(id) {
+  const [result] = await pool.query('DELETE FROM usuario WHERE id_usuario = ?', [id]);
+  return result.affectedRows;
+}
