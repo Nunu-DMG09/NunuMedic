@@ -87,7 +87,7 @@ export default function DashboardLayout() {
     { to: '/admins', icon: Icon.Users, label: 'Usuarios' }
   ];
 
-  const { logout, token } = useAuth();
+  const { logout, token, user: authUser } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -123,6 +123,11 @@ export default function DashboardLayout() {
       navigate('/');
     }
   };
+
+  const displayName = authUser ? `${authUser.nombre ?? ''} ${authUser.apellido ?? ''}`.trim() : (authUser?.usuario ?? '');
+  const initials = authUser
+    ? ((authUser.nombre?.split(' ').map(s => s[0]).join('') ?? '').slice(0,1) + (authUser.apellido?.split(' ').map(s => s[0]).join('') ?? '').slice(0,1)).toUpperCase()
+    : 'DM';
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -308,13 +313,13 @@ export default function DashboardLayout() {
                 title="Perfil / Usuarios"
               >
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold text-xs sm:text-sm">DM</span>
+                  <span className="text-white font-semibold text-xs sm:text-sm">{initials}</span>
                 </div>
                 <span className="font-semibold text-slate-700 text-xs sm:text-sm md:text-base hidden sm:block">
-                  L. David Mesta
+                  {displayName || 'Usuario'}
                 </span>
                 <span className="font-semibold text-slate-700 text-xs sm:hidden">
-                  DM
+                  {initials}
                 </span>
               </button>
             </div>
