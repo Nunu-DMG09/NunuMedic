@@ -1,4 +1,5 @@
 import * as Usuario from '../models/usuario.model.js';
+import bcrypt from 'bcryptjs';
 
 export async function getUsuarioById(req, res) {
   try {
@@ -16,9 +17,23 @@ export async function getUsuarioById(req, res) {
 
 export async function createUsuario(req, res) {
   try {
-    const { usuario, clave } = req.body;
+    const { usuario, clave, nombre, apellido, dni, telefono, email, rol = 'admin' } = req.body;
     if (!usuario || !clave) return res.status(400).json({ error: 'usuario y clave son requeridos' });
-    const id = await Usuario.createUsuario(req.body);
+
+    const saltRounds = 10;
+    const hashed = await bcrypt.hash(clave, saltRounds);
+
+    const id = await Usuario.createUsuario({
+      nombre,
+      apellido,
+      dni,
+      telefono,
+      email,
+      usuario,
+      clave: hashed,
+      rol
+    });
+
     return res.status(201).json({ message: 'Usuario creado', id_usuario: id });
   } catch (err) {
     console.error(err);
@@ -33,5 +48,58 @@ export async function getAllUsuarios(req, res) {
   } catch (err) {
     console.error('getAllUsuarios error', err);
     return res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+}
+
+// Nuevo: actualizar rol
+export async function updateUsuarioRol(req, res) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { rol } = req.body;
+    if (!id || !rol) return res.status(400).json({ error: 'ID y rol son requeridos' });
+
+    const affected = await Usuario.updateRole(id, rol);
+    if (!affected) return res.status(404).json({ error: 'Usuario no encontrado o sin cambios' });
+
+    return res.status(200).json({ message: 'Rol actualizado' });
+  } catch (err) {
+    console.error('updateUsuarioRol error', err);
+    return res.status(500).json({ error: 'Error al actualizar rol' });
+  }
+}
+
+// Nuevo: actualizar clave (con hash)
+export async function updateUsuarioClave(req, res) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { clave } = req.body;
+    if (!id || !clave) return res.status(400).json({ error: 'ID y clave son requeridos' });
+
+    const saltRounds = 10;
+    const hashed = await bcrypt.hash(clave, saltRounds);
+
+    const affected = await Usuario.updateClave(id, hashed);
+    if (!affected) return res.status(404).json({ error: 'Usuario no encontrado o sin cambios' });
+
+    return res.status(200).json({ message: 'Clave actualizada' });
+  } catch (err) {
+    console.error('updateUsuarioClave error', err);
+    return res.status(500).json({ error: 'Error al actualizar clave' });
+  }
+}
+
+// Nuevo: eliminar usuario
+export async function deleteUsuario(req, res) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (!id) return res.status(400).json({ error: 'ID inválido' });
+
+    const affected = await Usuario.deleteById(id);
+    if (!affected) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    return res.status(200).json({ message: 'Usuario eliminado' });
+  } catch (err) {
+    console.error('deleteUsuario error', err);
+    return res.status(500).json({ error: 'Error al eliminar usuario' });
   }
 }
