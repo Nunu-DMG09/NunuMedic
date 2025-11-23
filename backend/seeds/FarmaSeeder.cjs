@@ -98,10 +98,12 @@ module.exports.seed = async function(knex) {
 
   const passSuper = bcrypt.hashSync('12345678', 10); 
   const passAdmin = bcrypt.hashSync('87654321', 10);
+  const passVendedor = bcrypt.hashSync('12312312', 10);
 
   const usuarios = [
     { nombre: 'DAVID', apellido: 'MESTA', dni: '12345678', telefono: '987654321', email: 'davidmesta@gmail.com', usuario: '12345678', clave: passSuper, rol: 'super_admin', estado: 'activo' },
-    { nombre: 'Admin', apellido: 'Local', dni: '87654321', telefono: '999999999', email: 'admin_local@example.com', usuario: '87654321', clave: passAdmin, rol: 'admin', estado: 'activo' }
+    { nombre: 'Admin', apellido: 'Local', dni: '87654321', telefono: '999999999', email: 'admin_local@example.com', usuario: '87654321', clave: passAdmin, rol: 'admin', estado: 'activo' },
+    { nombre: 'vendedor', apellido: 'Local', dni: '12312312', telefono: '999666333', email: 'vendedor@gmail.com', usuario: '12312312', clave: passVendedor, rol: 'vendedor', estado: 'activo' }
   ];
 
   await knex('usuario').insert(usuarios);
