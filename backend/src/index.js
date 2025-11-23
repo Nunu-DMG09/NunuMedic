@@ -11,6 +11,7 @@ import movimientoRoutes from "./routes/movimiento_stock.route.js";
 import clienteRoutes from "./routes/cliente.route.js";
 import usuarioRoutes from "./routes/usuario.route.js";
 import authRoute from './routes/auth.route.js';
+import protectedRoutes from './routes/protected.route.js';
 dotenv.config();
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/protected', protectedRoutes);
 
 // health
 app.get("/", (req, res) => {
