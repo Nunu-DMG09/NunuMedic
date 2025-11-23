@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import AdminsHeader from '../components/admin/AdminsHeader';
+import { EditPasswordModal, EditRoleModal, ConfirmDeleteModal, CreateAdminModal, EditStateModal } from '../components/admin/AdminsModals';
 
 export default function AdminsPage() {
   const [admins, setAdmins] = useState([]);
@@ -30,6 +30,40 @@ export default function AdminsPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // acciones por usuario (loading)
+  const [actionLoading, setActionLoading] = useState({});
+
+  const setAction = (key, val) => setActionLoading(prev => ({ ...prev, [key]: val }));
+
+  // modals state
+  const [passwordModalUser, setPasswordModalUser] = useState(null);
+  const [roleModalUser, setRoleModalUser] = useState(null);
+  const [deleteModalUser, setDeleteModalUser] = useState(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [stateModalUser, setStateModalUser] = useState(null);
+
+  // abrir modales (reemplazan prompts)
+  async function handleChangeRole(user) {
+    setRoleModalUser(user);
+  }
+
+  async function handleChangeClave(user) {
+    setPasswordModalUser(user);
+  }
+
+  async function handleDelete(user) {
+    setDeleteModalUser(user);
+  }
+
+  function handleChangeEstado(user) {
+    setStateModalUser(user);
+  }
+
+  // callback para refrescar lista cuando modal confirma la acción
+  function onModalSaved() {
+    fetchAdmins();
   }
 
   const filtered = useMemo(() => {
@@ -69,6 +103,49 @@ export default function AdminsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
         <AdminsHeader />
+        <div className="mt-4 flex justify-end gap-2">
+          <button onClick={() => setCreateModalOpen(true)} className="px-4 py-2 bg-green-600 text-white rounded-xl shadow">Nuevo Administrador</button>
+        </div>
+        {/* Modales */}
+        {passwordModalUser && (
+          <EditPasswordModal
+            open={!!passwordModalUser}
+            user={passwordModalUser}
+            onClose={() => setPasswordModalUser(null)}
+            onSaved={onModalSaved}
+          />
+        )}
+        {roleModalUser && (
+          <EditRoleModal
+            open={!!roleModalUser}
+            user={roleModalUser}
+            onClose={() => setRoleModalUser(null)}
+            onSaved={onModalSaved}
+          />
+        )}
+        {deleteModalUser && (
+          <ConfirmDeleteModal
+            open={!!deleteModalUser}
+            user={deleteModalUser}
+            onClose={() => setDeleteModalUser(null)}
+            onDeleted={onModalSaved}
+          />
+        )}
+        {createModalOpen && (
+          <CreateAdminModal
+            open={createModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            onCreated={() => { setCreateModalOpen(false); fetchAdmins(); }}
+          />
+        )}
+        {stateModalUser && (
+          <EditStateModal
+            open={!!stateModalUser}
+            user={stateModalUser}
+            onClose={() => setStateModalUser(null)}
+            onSaved={() => { setStateModalUser(null); onModalSaved(); }}
+          />
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -229,16 +306,17 @@ export default function AdminsPage() {
                   <th className="px-6 py-4 text-left text-sm font-bold text-white">Contacto</th>
                   <th className="px-6 py-4 text-center text-sm font-bold text-white">Rol</th>
                   <th className="px-6 py-4 text-center text-sm font-bold text-white">Estado</th>
+                  <th className="px-6 py-4 text-center text-sm font-bold text-white">Acciones</th>
                 </tr>
               </thead>
               <tbody className="bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center">Cargando administradores...</td>
+                    <td colSpan={6} className="p-12 text-center">Cargando administradores...</td>
                   </tr>
                 ) : paginatedAdmins.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center">No hay administradores</td>
+                    <td colSpan={6} className="p-12 text-center">No hay administradores</td>
                   </tr>
                 ) : (
                   paginatedAdmins.map((u, idx) => (
@@ -274,11 +352,54 @@ export default function AdminsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                          u.estado === 'activo' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'
-                        }`}>
+                        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${u.estado === 'activo' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
                           {u.estado}
                         </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-center">
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            onClick={() => handleChangeClave(u)}
+                            disabled={!!actionLoading[`${u.id_usuario}_clave`]}
+                            title="Editar clave"
+                            className="p-2 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700"
+                          >
+                            {/* lock icon */}
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                          </button>
+
+                          <button
+                            onClick={() => handleChangeRole(u)}
+                            disabled={!!actionLoading[`${u.id_usuario}_rol`]}
+                            title="Editar rol"
+                            className="p-2 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700"
+                          >
+                            {/* role icon */}
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10z"/><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/></svg>
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(u)}
+                            disabled={!!actionLoading[`${u.id_usuario}_del`]}
+                            title="Eliminar usuario"
+                            className="p-2 rounded-md bg-red-50 hover:bg-red-100 text-red-600"
+                          >
+                            {/* trash icon */}
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                          </button>
+
+                          <button
+                            onClick={() => handleChangeEstado(u)}
+                            disabled={!!actionLoading[`${u.id_usuario}_estado`]}
+                            title="Cambiar estado"
+                            className="p-2 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                              <path d="M12 2v6" /><path d="M5 9l7 7 7-7"/>
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -321,8 +442,12 @@ export default function AdminsPage() {
                   </div>
 
                   <div className="flex flex-col items-end gap-2">
-                    <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">Editar</button>
-                    <button className="px-3 py-1 bg-red-100 text-red-700 rounded-md text-xs">Eliminar</button>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleChangeClave(u)} disabled={!!actionLoading[`${u.id_usuario}_clave`]} className="px-3 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">Clave</button>
+                      <button onClick={() => handleChangeRole(u)} disabled={!!actionLoading[`${u.id_usuario}_rol`]} className="px-3 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">Rol</button>
+                      <button onClick={() => handleDelete(u)} disabled={!!actionLoading[`${u.id_usuario}_del`]} className="px-3 py-1 bg-red-100 text-red-700 rounded-md text-xs">Eliminar</button>
+                      <button onClick={() => handleChangeEstado(u)} disabled={!!actionLoading[`${u.id_usuario}_estado`]} className="px-3 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">Estado</button>
+                    </div>
                   </div>
                 </div>
               </div>
