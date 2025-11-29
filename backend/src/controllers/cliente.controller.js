@@ -29,7 +29,7 @@ export async function createCliente(req, res) {
   try {
     const { nombre, apellido, dni } = req.body;
     
-    // Validaciones
+   
     if (!nombre || !apellido) {
       return res.status(400).json({ error: 'Nombre y apellido son requeridos' });
     }
@@ -38,7 +38,7 @@ export async function createCliente(req, res) {
       return res.status(400).json({ error: 'DNI es requerido' });
     }
 
-    // Verificar si ya existe un cliente con ese DNI
+    
     try {
       const existingCliente = await Cliente.findByDni(dni);
       if (existingCliente) {
@@ -54,7 +54,6 @@ export async function createCliente(req, res) {
     // Crear cliente
     const id = await Cliente.createCliente(req.body);
     
-    // Obtener el cliente creado
     const clienteCreado = await Cliente.findById(id);
     
     return res.status(201).json({ 

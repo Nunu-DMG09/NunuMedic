@@ -30,7 +30,7 @@ export async function login(req, res) {
       estado: user.estado
     });
 
-    // set cookie
+    
     const cookieOptions = {
       httpOnly: true,
       sameSite: 'lax',
@@ -39,7 +39,7 @@ export async function login(req, res) {
     };
     res.cookie('access_token', token, cookieOptions);
 
-    // don't send password
+   
     delete user.clave;
     return res.status(200).json({ message: 'Inicio de sesión correcto', user, token });
   } catch (err) {
@@ -50,7 +50,7 @@ export async function login(req, res) {
 
 export function logout(req, res) {
   try {
-    // revoke token if provided (header, body or cookie)
+   
     const authHeader = req.headers.authorization || '';
     const tokenFromHeader = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
     const token = tokenFromHeader || req.body?.token || req.query?.token || req.cookies?.access_token;
@@ -76,7 +76,6 @@ export function revokeToken(token) {
   if (token) revokedTokens.add(token);
 }
 
-// refresh endpoint: valida cookie o header, verifica usuario y reemite cookie (rol/change detection)
 export async function refresh(req, res) {
   try {
     const token = req.cookies?.access_token || (req.headers.authorization && req.headers.authorization.startsWith('Bearer ') ? req.headers.authorization.slice(7) : null);
