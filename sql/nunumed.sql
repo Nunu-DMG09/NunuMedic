@@ -241,7 +241,8 @@ CREATE TABLE `usuario` (
 
 INSERT INTO `usuario` (`id_usuario`, `nombre`, `apellido`, `dni`, `telefono`, `email`, `usuario`, `clave`, `rol`, `estado`) VALUES
 (1, 'DAVID', 'MESTA', '12345678', '987654321', 'davidmesta@gmail.com', '12345678', '$2b$10$QXGAdUj2zGfnPxI4QMT2r.kzZ.rTRml4HJrBREPu2Oyfr76xNUhOO', 'super_admin', 'activo'),
-(2, 'Admin', 'Local', '87654321', '999999999', 'admin_local@example.com', '87654321', '$2b$10$HoZ5vlJnkWgWr9NZLQq04uCgtfvTPE3ERnT0oPU5sYnoC1HJDIbnG', 'admin', 'activo');
+(2, 'Admin', 'Local', '87654321', '999999999', 'admin_local@example.com', '87654321', '$2b$10$HoZ5vlJnkWgWr9NZLQq04uCgtfvTPE3ERnT0oPU5sYnoC1HJDIbnG', 'admin', 'activo'),
+(3, 'vendedor', 'Local', '12312312', '999666333', 'vendedor@gmail.com', '12312312', '$2b$10$7k5/ii4dMyi06WbciLUeAewjqnt8ayQedcW2UmOxOPCmQD74kbgGe', 'vendedor', 'activo');
 
 -- --------------------------------------------------------
 
