@@ -32,7 +32,6 @@ export default async function authMiddleware(req, res, next) {
       return res.status(403).json({ error: 'Cuenta desactivada' });
     }
 
-    // attach user to request for downstream handlers
     req.user = {
       id: user.id_usuario,
       nombre: user.nombre,

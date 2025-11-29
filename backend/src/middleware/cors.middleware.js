@@ -18,7 +18,7 @@ const corsOptions = DEV
     }
   : {
       origin: (origin, cb) => {
-        if (!origin) return cb(null, true); // curl / Postman
+        if (!origin) return cb(null, true); 
         return FRONTENDS.includes(origin) ? cb(null, true) : cb(new Error('Origin not allowed'), false);
       },
       credentials: true,

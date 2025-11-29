@@ -29,13 +29,13 @@ const ROLE_PERMISSIONS = {
   ],
 };
 
-// middleware factory: requiere uno o varios permisos
+
 export function requirePermission(required) {
   // required: string o array de strings
   const requiredArray = Array.isArray(required) ? required : [required];
   return (req, res, next) => {
     try {
-      const user = req.user; // asume que auth middleware puso req.user con { id, rol, ... }
+      const user = req.user; 
       if (!user) return res.status(401).json({ error: 'No autorizado' });
       const role = user.rol;
       const perms = ROLE_PERMISSIONS[role] || [];
@@ -49,7 +49,7 @@ export function requirePermission(required) {
   };
 }
 
-// convenience middleware requireRole (por rol explícito)
+
 export function requireRole(...roles) {
   return (req, res, next) => {
     const user = req.user;
