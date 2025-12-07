@@ -4,6 +4,7 @@ import api from '../services/api';
 import useAuth from '../hooks/useAuth';
 import { useTheme } from '../context/ThemeContext';
 import { hasPermission, PERMISSIONS, ROLES } from '../filters/roles';
+import logo from '../assets/nudav-logo1.svg';
 
 const Icon = {
   Dashboard: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z" stroke="currentColor" strokeWidth="1.5"/></svg>,
@@ -27,6 +28,10 @@ export default function DashboardLayout() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const togglePin = () => { setIsPinned(p => { const next = !p; setIsExpanded(next); return next; }); };
+
+  const { logout, token, user: authUser } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   const fetchLowStock = async () => {
     try {
@@ -73,7 +78,6 @@ export default function DashboardLayout() {
     setShowNotifications(false);
   };
 
-
   const baseMenu = [
     { to: '/dashboard', icon: Icon.Dashboard, label: 'Dashboard' },
     { to: '/ventas', icon: Icon.Sales, label: 'Ventas' },
@@ -83,9 +87,6 @@ export default function DashboardLayout() {
     { to: '/admins', icon: Icon.Users, label: 'Usuarios' }
   ];
 
-  const { logout, token, user: authUser } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
-  const navigate = useNavigate();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -118,19 +119,15 @@ export default function DashboardLayout() {
     }
   };
 
-  
   const user = authUser;
   const role = user?.rol;
   const isVendedor = role === ROLES.VENDEDOR;
   const canViewUsers = hasPermission(role, PERMISSIONS.USERS_PANEL);
 
-  
   let visibleMenu = [];
   if (isVendedor) {
-    
     visibleMenu = baseMenu.filter(i => i.to === '/ventas' || i.to === '/ventas/historial');
   } else {
-   
     visibleMenu = baseMenu.filter(i => {
       if (i.to === '/admins' && !canViewUsers) return false;
       return true;
@@ -160,9 +157,10 @@ export default function DashboardLayout() {
           <button
             onClick={() => navigate('/dashboard')}
             title="Ir a Dashboard"
-            className="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg focus:outline-none"
+            aria-label="Ir a Dashboard"
+            className="w-24 h-24 bg-transparent rounded-full flex items-center justify-center p-0 focus:outline-none"
           >
-            <span className="text-white font-bold text-xl select-none">NU</span>
+            <img src={logo} alt="Nudav Studio" className="w-16 h-16 object-contain select-none rounded-full" />
           </button>
         </div>
 
@@ -361,7 +359,7 @@ export default function DashboardLayout() {
             </div>
 
             <div className="mt-4">
-              {lowStockProducts.length === 0 ? (
+              {lowStockProducts.length === 0 ? (  
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-4">
                     <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
