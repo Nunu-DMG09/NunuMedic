@@ -58,7 +58,7 @@ export default function LoginPage() {
       
         <div className="text-center mb-6 sm:mb-8 md:mb-10">
           <img
-            src="/logo-nunumedic."
+            src="/nudav-logo1.svg"
             alt="NUNUMEDIC Logo"
             className="w-16 h-16 sm:w-20 sm:h-20 mx-auto object-contain mb-3 sm:mb-5 drop-shadow-2xl"
             onError={(e) => {
