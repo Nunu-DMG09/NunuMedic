@@ -151,7 +151,7 @@ export default function DashboardLayout() {
       <nav
         className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-50 md:z-auto ${isExpanded ? 'w-56' : 'w-28'} h-full bg-white shadow-xl border-r border-slate-200/60 flex flex-col items-center py-6 transition-all duration-700 ease-out`}
       >
-        <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-blue-400 to-cyan-500"></div>
+        <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-blue-400 to-bue-500"></div>
 
         <div className="mb-10">
           <button
@@ -175,8 +175,8 @@ export default function DashboardLayout() {
               className={({ isActive }) =>
                 `group relative flex items-center ${isExpanded ? 'justify-start pl-4 pr-3' : 'justify-center'} gap-3 p-3 rounded-xl transform-gpu transition-all duration-700 ease-out ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-400 to-cyan-500 text-white shadow-lg'
-                    : 'text-slate-600 hover:text-blue-600 hover:bg-cyan-50'
+                    ? 'bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-lg'
+                    : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50'
                 }`
               }
             >
@@ -299,10 +299,10 @@ export default function DashboardLayout() {
 
               <button
                 onClick={() => navigate(canViewUsers ? '/admins' : '/profile')}
-                className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2 sm:py-3 bg-gradient-to-r from-cyan-50 to-sky-50 rounded-full border border-blue-200/50 hover:shadow-md transition-colors focus:outline-none"
+                className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2 sm:py-3 bg-gradient-to-r from-blue-400 to-blue-200 rounded-full border border-blue-900/50 hover:shadow-md transition-colors focus:outline-none"
                 title="Perfil"
               >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-cyan-600 to-sky-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-700 to-sky-700 rounded-full flex items-center justify-center">
                   <span className="text-white font-semibold text-xs sm:text-sm">{initials}</span>
                 </div>
                 <span className="font-semibold text-slate-700 text-xs sm:text-sm md:text-base">
