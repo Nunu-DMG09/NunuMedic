@@ -146,9 +146,12 @@ export default function MovimientosPage() {
             <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-full -translate-y-8 translate-x-8 opacity-40 hidden sm:block"></div>
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6z" clipRule="evenodd"/>
-                </svg>
+                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                <path d="M20 8h-7a3 3 0 00-3 3v2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M4 16h7a3 3 0 003-3v-2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M17 5l3 3-3 3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M7 19l-3-3 3-3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
               </div>
               <div>
                 <div className="text-xs sm:text-sm text-slate-600">Total Movimientos</div>
@@ -160,7 +163,7 @@ export default function MovimientosPage() {
 
         
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-8">
-          {/* Header */}
+         
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="text-lg sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
