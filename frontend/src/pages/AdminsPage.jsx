@@ -32,7 +32,7 @@ export default function AdminsPage() {
     }
   }
 
-  // acciones por usuario (loading)
+ 
   const [actionLoading, setActionLoading] = useState({});
 
   const setAction = (key, val) => setActionLoading(prev => ({ ...prev, [key]: val }));
@@ -116,7 +116,7 @@ export default function AdminsPage() {
     return arr;
   }, [admins]);
   
-  // role options for the filter (always include 'vendedor')
+ 
   const roleOptions = useMemo(() => {
     return [...new Set([...(admins.map(u => u.rol || '').filter(Boolean)), 'super_admin', 'admin', 'vendedor'])];
   }, [admins]);
@@ -126,7 +126,7 @@ export default function AdminsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
         <AdminsHeader />
 
-        {/* Modales */}
+      
         {passwordModalUser && (
           <EditPasswordModal
             open={!!passwordModalUser}
@@ -169,7 +169,7 @@ export default function AdminsPage() {
           />
         )}
 
-        {/* Stats */}
+     
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 p-4 sm:p-6">
             <div className="flex items-center gap-3">
@@ -228,7 +228,7 @@ export default function AdminsPage() {
           </div>
         </div>
 
-        {/* Main (table/filter) - unchanged aside from action buttons order */}
+        
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200/50 overflow-hidden">
           {/* Header */}
           <div className="p-4 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -389,39 +389,57 @@ export default function AdminsPage() {
 
                       <td className="px-6 py-4 text-center">
                         <div className="inline-flex items-center gap-2">
-                          {/* lock (clave) */}
+                          {/* Cambiar contraseña */}
                           <button
                             onClick={() => handleChangeClave(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_clave`]}
                             title="Editar clave"
-                            className="p-2 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700"
+                            className="p-2 rounded-md transition bg-blue-50 hover:bg-blue-100 text-blue-600"
                           >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                              <rect x="3" y="11" width="18" height="10" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M7 11V7a5 5 0 0110 0v4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
                           </button>
 
-                          {/* role */}
+                          {/* Cambiar rol */}
                           <button
                             onClick={() => handleChangeRole(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_rol`]}
                             title="Editar rol"
-                            className="p-2 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700"
+                            className="p-2 rounded-md transition bg-amber-50 hover:bg-amber-100 text-amber-700"
                           >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10z"/><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/></svg>
-                          </button>
-
-                          {/* state (beside role) */}
-                          <button
-                            onClick={() => handleChangeEstado(u)}
-                            disabled={!!actionLoading[`${u.id_usuario}_estado`]}
-                            title="Cambiar estado"
-                            className="p-2 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700"
-                          >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path d="M12 2v6" /><path d="M5 9l7 7 7-7"/>
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                              <path d="M12 12a5 5 0 100-10 5 5 0 000 10z" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </button>
 
-                          {/* delete at the end */}
+                          {/* Cambiar estado */}
+                          <button
+                            onClick={() => handleChangeEstado(u)}
+                            disabled={!!actionLoading[`${u.id_usuario}_estado`]}
+                            title={u.estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario'}
+                            className={`p-2 rounded-md transition ${
+                              u.estado === 'activo'
+                                ? 'bg-green-50 hover:bg-green-100 text-green-600'
+                                : 'bg-amber-50 hover:bg-amber-100 text-amber-700'
+                            }`}
+                          >
+                            {u.estado === 'activo' ? (
+                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                                <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                                <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            ) : (
+                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                                <path d="M15 9l-6 6M9 9l6 6" strokeLinecap="round" strokeLinejoin="round" />
+                                <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
+                          </button>
+
+                          {/* Eliminar usuario */}
                           <button
                             onClick={() => handleDelete(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_del`]}
