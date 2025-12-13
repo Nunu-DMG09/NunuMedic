@@ -11,7 +11,7 @@ export default function InventarioHeader({
 
   return (
     <header className="bg-gradient-to-r from-slate-800 via-slate-900 to-indigo-900 relative overflow-hidden rounded-2xl mb-6 sm:mb-8 shadow-xl">
-      {/* Decorative elements - hidden on small screens */}
+      
       <div className="absolute inset-0 pointer-events-none">
         <div className="hidden sm:block absolute top-0 left-1/4 w-48 h-48 bg-blue-500/10 rounded-full -translate-y-28" />
         <div className="hidden md:block absolute bottom-0 right-1/4 w-72 h-72 bg-indigo-500/10 rounded-full translate-y-36" />
@@ -20,7 +20,7 @@ export default function InventarioHeader({
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          {/* Left: Back button */}
+     
           <div className="w-full sm:w-auto flex items-center">
             <button
               onClick={() => navigate(backTo)}
@@ -39,9 +39,10 @@ export default function InventarioHeader({
           <div className="flex-1 text-center sm:text-center min-w-0">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" viewBox="0 0 24 24" fill="none">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="1.2"/>
-                  <path d="M7.5 4.21L12 6.81l4.5-2.6M12 6.81V17.69" stroke="currentColor" strokeWidth="1.2"/>
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M3 8h18" />
+                  <rect x="4" y="9" width="16" height="9" rx="1.5" />
+                  <path d="M12 9v9" />
                 </svg>
               </div>
 
@@ -52,7 +53,6 @@ export default function InventarioHeader({
             </div>
           </div>
 
-          {/* Right: Stats or actions - collapsed on mobile */}
           <div className="w-full sm:w-auto flex items-center justify-end gap-3">
             <div className="hidden sm:flex flex-col items-end text-right">
               <div className="text-base sm:text-2xl font-bold text-white">NUNUMEDIC</div>
