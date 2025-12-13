@@ -243,9 +243,12 @@ export default function InventarioPage() {
               <div className="relative">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-purple-100 rounded-xl">
-                    <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6z" clipRule="evenodd"/>
-                    </svg>
+                    <svg className="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <rect x="3" y="3" width="8" height="8" rx="1" />
+                    <rect x="13" y="3" width="8" height="8" rx="1" />
+                    <rect x="3" y="13" width="8" height="8" rx="1" />
+                    <rect x="13" y="13" width="8" height="8" rx="1" />
+                  </svg>
                   </div>
                   <div>
                     <p className="text-xs sm:text-sm text-slate-600">Categorías</p>
@@ -445,8 +448,12 @@ export default function InventarioPage() {
                               className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                               title="Eliminar producto"
                             >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9zM4 5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clipRule="evenodd"/>
+                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                                <path d="M10 11v6" />
+                                <path d="M14 11v6" />
                               </svg>
                             </button>
                           </div>
