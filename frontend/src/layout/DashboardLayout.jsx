@@ -12,8 +12,10 @@ const Icon = {
   Inventory: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="1.5"/></svg>,
   Movimientos: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 1 1-3-6.5" stroke="currentColor" strokeWidth="1.5"/><path d="M12 7v6l4 2" stroke="currentColor" strokeWidth="1.5"/></svg>,
   Users: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" strokeWidth="1.5"/></svg>,
-  History: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M3 3v5h5M3.05 13A9 9 0 1 0 6 5.3L3 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  Settings: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" stroke="currentColor" strokeWidth="1.5"/></svg>
+  History: <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+</svg>,
+
 };
 
 export default function DashboardLayout() {
@@ -173,21 +175,24 @@ export default function DashboardLayout() {
               title={item.label}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `group relative flex items-center ${isExpanded ? 'justify-start pl-4 pr-3' : 'justify-center'} gap-3 p-3 rounded-xl transform-gpu transition-all duration-700 ease-out ${
+                `group relative flex items-center ${isExpanded ? 'justify-start pl-4 pr-3' : 'justify-center'} gap-3 p-3 rounded-xl transform-gpu transition-all duration-300 ease-out ${
                   isActive
                     ? 'bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-lg'
-                    : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50'
+                    : 'text-slate-600 hover:bg-gradient-to-r hover:from-blue-700 hover:to-blue-500 hover:shadow-lg'
                 }`
               }
             >
               <div className="flex items-center justify-center w-10 h-10 flex-shrink-0">
-                <div className="w-8 h-8 flex items-center justify-center transform-gpu transition-transform duration-700" style={{ transformOrigin: 'center' }}>
+                <div
+                  className="w-8 h-8 flex items-center justify-center transform-gpu transition-transform duration-700 transition-colors group-hover:text-white"
+                  style={{ transformOrigin: 'center' }}
+                >
                   {item.icon}
                 </div>
               </div>
 
               <span
-                className={`text-sm font-medium text-slate-800 transition-all duration-700 ease-out overflow-hidden whitespace-nowrap ${isExpanded ? 'max-w-[260px] opacity-100 ml-2' : 'max-w-0 opacity-0'}`}
+                className={`text-sm font-medium transition-all duration-700 ease-out overflow-hidden whitespace-nowrap ${isExpanded ? 'max-w-[260px] opacity-100 ml-2' : 'max-w-0 opacity-0'}`}
                 aria-hidden={!isExpanded}
               >
                 {item.label}
@@ -223,7 +228,7 @@ export default function DashboardLayout() {
           </div>
         </div>
 
-        <div className="mt-auto text-xs text-slate-400 font-medium">v2.0</div>
+        
       </nav>
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -241,11 +246,11 @@ export default function DashboardLayout() {
 
               <div>
                 <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                  <span className="hidden sm:inline">NUNUMEDIC - Panel Administrativo</span>
-                  <span className="sm:hidden">NUNUMEDIC</span>
+                  BIENVENIDO <span>{displayName}</span>
                 </h1>
                 <p className="text-slate-600 text-xs sm:text-sm md:text-base mt-1 hidden sm:block">
-                  Gestionamiento integral de ventas e inventario
+                  <span className="hidden sm:inline">NUNUMEDIC - Panel Administrativo</span>
+                  <span className="sm:hidden">NUNUMEDIC</span>
                 </p>
               </div>
             </div>
@@ -290,25 +295,13 @@ export default function DashboardLayout() {
 
               <button
                 onClick={openLogoutModal}
-                className="px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm text-red-600 bg-red-50 hover:bg-red-100 transition"
+                className="px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm text-white bg-red-500 hover:bg-red-600 transform-gpu transition-transform duration-200 hover:scale-105 active:translate-y-0.5 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-200"
                 title="Cerrar sesión"
               >
                 <span className="hidden sm:inline">Cerrar sesión</span>
                 <span className="sm:hidden">Salir</span>
               </button>
 
-              <button
-                onClick={() => navigate(canViewUsers ? '/admins' : '/profile')}
-                className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2 sm:py-3 bg-gradient-to-r from-blue-400 to-blue-200 rounded-full border border-blue-900/50 hover:shadow-md transition-colors focus:outline-none"
-                title="Perfil"
-              >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-700 to-sky-700 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold text-xs sm:text-sm">{initials}</span>
-                </div>
-                <span className="font-semibold text-slate-700 text-xs sm:text-sm md:text-base">
-                  {displayName}
-                </span>
-              </button>
             </div>
           </div>
         </header>
