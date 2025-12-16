@@ -48,10 +48,10 @@ export function ThemeProvider({ children }) {
   }, [isDark]);
 
   const toggleTheme = () => {
-    console.log('🔄 CAMBIANDO TEMA - Actual:', isDark ? 'OSCURO' : 'CLARO');
+    console.log(' CAMBIANDO TEMA - Actual:', isDark ? 'OSCURO' : 'CLARO');
     setIsDark(prev => {
       const newValue = !prev;
-      console.log('🔄 NUEVO TEMA:', newValue ? 'OSCURO' : 'CLARO');
+      console.log(' NUEVO TEMA:', newValue ? 'OSCURO' : 'CLARO');
       return newValue;
     });
   };

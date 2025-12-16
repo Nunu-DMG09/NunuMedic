@@ -35,7 +35,7 @@ export default function InventarioHeader({
             </button>
           </div>
 
-          {/* Center: Title */}
+      
           <div className="flex-1 text-center sm:text-center min-w-0">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
