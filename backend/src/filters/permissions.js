@@ -31,7 +31,7 @@ const ROLE_PERMISSIONS = {
 
 
 export function requirePermission(required) {
-  // required: string o array de strings
+
   const requiredArray = Array.isArray(required) ? required : [required];
   return (req, res, next) => {
     try {

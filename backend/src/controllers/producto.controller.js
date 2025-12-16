@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 
 const ProductoModel = Producto;
 
-// Helpers
+
 function toNumberOrNull(val) {
     if (val === undefined || val === null || val === '') return null;
     const n = Number(val);
@@ -22,7 +22,7 @@ function normalizeFecha(fecha) {
         if (dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d) return s;
         return null;
     }
-    // Formato DD-MM-YYYY
+  
     if (/^\d{2}-\d{2}-\d{4}$/.test(s)) {
         const [dd, mm, yyyy] = s.split('-').map(Number);
         const dt = new Date(Date.UTC(yyyy, mm - 1, dd));
@@ -31,7 +31,7 @@ function normalizeFecha(fecha) {
         }
         return null;
     }
-    // Formato DD/MM/YYYY
+   
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
         const [dd, mm, yyyy] = s.split('/').map(Number);
         const dt = new Date(Date.UTC(yyyy, mm - 1, dd));
