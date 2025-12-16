@@ -37,7 +37,7 @@ export default function AdminsPage() {
 
   const setAction = (key, val) => setActionLoading(prev => ({ ...prev, [key]: val }));
 
-  // modals state
+  
   const [passwordModalUser, setPasswordModalUser] = useState(null);
   const [roleModalUser, setRoleModalUser] = useState(null);
   const [deleteModalUser, setDeleteModalUser] = useState(null);
@@ -61,7 +61,7 @@ export default function AdminsPage() {
     setStateModalUser(user);
   }
 
-  // callback para refrescar lista cuando modal confirma la acción
+  
   function onModalSaved() {
     fetchAdmins();
   }
@@ -102,9 +102,9 @@ export default function AdminsPage() {
   const availableRoles = useMemo(() => {
     const setRoles = new Set(admins.map(u => (u.rol || '').trim()).filter(Boolean));
     const arr = Array.from(setRoles);
-    // ensure core roles are always present (incl. 'vendedor')
+    
     ['super_admin', 'admin', 'vendedor'].forEach(r => { if (!arr.includes(r)) arr.push(r); });
-    // prefer a stable ordering: super_admin, admin, vendedor, then the rest alphabetically
+  
     const order = ['super_admin', 'admin', 'vendedor'];
     arr.sort((a, b) => {
       const ia = order.indexOf(a), ib = order.indexOf(b);
@@ -265,7 +265,7 @@ export default function AdminsPage() {
             </div>
           </div>
 
-          {/* Filters */}
+        
           <div className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               <div className="sm:col-span-1">
@@ -402,7 +402,7 @@ export default function AdminsPage() {
                             </svg>
                           </button>
 
-                          {/* Cambiar rol */}
+                         
                           <button
                             onClick={() => handleChangeRole(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_rol`]}
@@ -415,7 +415,7 @@ export default function AdminsPage() {
                             </svg>
                           </button>
 
-                          {/* Cambiar estado */}
+                     
                           <button
                             onClick={() => handleChangeEstado(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_estado`]}
@@ -439,7 +439,7 @@ export default function AdminsPage() {
                             )}
                           </button>
 
-                          {/* Eliminar usuario */}
+                         
                           <button
                             onClick={() => handleDelete(u)}
                             disabled={!!actionLoading[`${u.id_usuario}_del`]}
@@ -457,7 +457,7 @@ export default function AdminsPage() {
             </table>
           </div>
 
-          {/* mobile list (same button order) */}
+     
           <div className="sm:hidden divide-y divide-slate-200">
             {loading ? (
               <div className="p-6 text-center text-slate-500">Cargando usuarios...</div>
