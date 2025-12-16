@@ -6,5 +6,5 @@ export function getSecretKey() {
 
 export function getTokenExpiration() {
   const exp = process.env.JWT_EXP;
-  return exp ? parseInt(exp, 10) : 3600; // seconds
+  return exp ? parseInt(exp, 10) : 3600; 
 }
