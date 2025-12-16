@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
+import useProductos from '../hooks/useProductos';
 import ProductoForm from '../components/inventario/ProductoForm';
 import Modal from '../components/inventario/Modal';
 import FilterPagination from '../components/inventario/FilterPagination';
@@ -7,8 +7,23 @@ import InventarioHeader from '../components/inventario/InventarioHeader';
 import api from '../services/api';
 
 export default function InventarioPage() {
-  const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    productos,
+    loading,
+    page,
+    setPage,
+    perPage,
+    totalItems,
+    filters,
+    setFilters,
+    fetch,
+    createProducto,
+    updateProducto,
+    deleteProducto,
+    syncEstadosLocal,
+    notifyIfLow
+  } = useProductos({ initialPage: 1, perPage: 15 });
+
   const [refreshKey, setRefreshKey] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [categoriasMap, setCategoriasMap] = useState({});
@@ -18,18 +33,10 @@ export default function InventarioPage() {
   const notifiedRef = useRef(new Set());
   const updatedStateRef = useRef(new Set()); 
 
-  // filtros / paginación server-side
-  const [search, setSearch] = useState('');
-  const [categoriaFilter, setCategoriaFilter] = useState('');
-  const [estadoFilter, setEstadoFilter] = useState('');
-  const [minStock, setMinStock] = useState('');
-  const [maxStock, setMaxStock] = useState('');
-  const [page, setPage] = useState(1);
-  const perPage = 15;
-  const [totalItems, setTotalItems] = useState(0);
+  const { search, categoriaFilter, estadoFilter, minStock, maxStock } = filters;
 
   useEffect(() => { fetchCategorias(); }, []);
-  useEffect(() => { fetchProductos(); }, [refreshKey, page, search, categoriaFilter, estadoFilter, minStock, maxStock]);
+  useEffect(() => { fetch(); }, [refreshKey, page, search, categoriaFilter, estadoFilter, minStock, maxStock]);
 
   
   useEffect(() => {
@@ -43,7 +50,7 @@ export default function InventarioPage() {
         const stockNum = Number(p.stock ?? 0);
         const minNum = Number(p.stock_minimo ?? 0);
 
-        // usar el valor que coincide con el ENUM de la BD: 'vencimiento'
+        
         let desired = 'disponible';
         if (!isNaN(minNum) && stockNum <= minNum && stockNum > 0) desired = 'vencimiento';
         if (stockNum <= 0) desired = 'agotado';
@@ -84,34 +91,6 @@ export default function InventarioPage() {
     } catch (err) {
       console.error('Error cargando categorías', err);
       setCategoriasMap({});
-    }
-  }
-
-  async function fetchProductos() {
-    setLoading(true);
-    try {
-      const res = await api.get('/api/productos/paginar', {
-        params: {
-          page,
-          perPage,
-          search: search || undefined,
-          categoria: categoriaFilter || undefined,
-          estado: estadoFilter || undefined,
-          minStock: minStock !== '' ? minStock : undefined,
-          maxStock: maxStock !== '' ? maxStock : undefined
-        }
-      });
-      const payload = res.data ?? {};
-      const items = Array.isArray(payload.items) ? payload.items : (Array.isArray(payload.data) ? payload.data : []);
-      const total = Number(payload.total ?? payload.totalItems ?? 0);
-      setProductos(items);
-      setTotalItems(total);
-    } catch (err) {
-      console.error('Error fetching productos', err);
-      setProductos([]);
-      setTotalItems(0);
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -164,11 +143,13 @@ export default function InventarioPage() {
   }, [productos]);
 
   function clearFilters() {
-    setSearch('');
-    setCategoriaFilter('');
-    setEstadoFilter('');
-    setMinStock('');
-    setMaxStock('');
+    setFilters({
+      search: '',
+      categoria: '',
+      estado: '',
+      minStock: '',
+      maxStock: ''
+    });
     setPage(1);
   }
 
@@ -306,16 +287,16 @@ export default function InventarioPage() {
             <div className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50">
               <FilterPagination
                 search={search}
-                onSearchChange={val => { setSearch(val); setPage(1); }}
+                onSearchChange={val => { setFilters(f => ({ ...f, search: val })); setPage(1); }}
                 categoria={categoriaFilter}
-                onCategoriaChange={val => { setCategoriaFilter(val); setPage(1); }}
+                onCategoriaChange={val => { setFilters(f => ({ ...f, categoria: val })); setPage(1); }}
                 categoriasMap={categoriasMap}
                 estado={estadoFilter}
-                onEstadoChange={val => { setEstadoFilter(val); setPage(1); }}
+                onEstadoChange={val => { setFilters(f => ({ ...f, estado: val })); setPage(1); }}
                 minStock={minStock}
-                onMinStockChange={val => { setMinStock(val); setPage(1); }}
+                onMinStockChange={val => { setFilters(f => ({ ...f, minStock: val })); setPage(1); }}
                 maxStock={maxStock}
-                onMaxStockChange={val => { setMaxStock(val); setPage(1); }}
+                onMaxStockChange={val => { setFilters(f => ({ ...f, maxStock: val })); setPage(1); }}
                 onClear={clearFilters}
                 page={page}
                 totalPages={totalPages}
