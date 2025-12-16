@@ -24,7 +24,6 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
 
  
   if (!allowedRoles.includes(user.rol)) {
-    // redirigir según rol a una página segura
     if (user.rol === ROLES.VENDEDOR) return <Navigate to="/ventas" replace />;
     return <Navigate to="/dashboard" replace />;
   }
