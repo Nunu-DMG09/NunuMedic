@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import api from '../services/api';
+import api from '../core/api/api';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
