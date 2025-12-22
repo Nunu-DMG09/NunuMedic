@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../../../core/api/api';
 
 export async function listProductos(params = {}) {
   const res = await api.get('/api/productos/paginar', { params, validateStatus: false });
