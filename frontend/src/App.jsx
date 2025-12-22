@@ -1,18 +1,18 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import LoginPage from './pages/LoginPage';
-import InventarioPage from './pages/InventarioPage';
-import VentasPage from './pages/VentasPage';
-import VentasHistorialPage from './pages/VentasHistorialPage';
+import { AuthProvider } from './modules/auth/context/AuthContext';
+import LoginPage from './modules/auth/pages/LoginPage';
+import InventarioPage from './modules/inventario/pages/InventarioPage';
+import VentasPage from './modules/ventas/pages/VentasPage';
+import VentasHistorialPage from './modules/historial_ventas/pages/VentasHistorialPage';
 import Dashboard from './pages/Dashboard';
-import MovimientosPage from './pages/MovimientosPage';
-import AdminsPage from './pages/AdminsPage';
-import DashboardLayout from './layout/DashboardLayout';
-import { ThemeProvider } from './context/ThemeContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import { ROLES } from './filters/roles';
+import MovimientosPage from './modules/movimientos/pages/MovimientosPage';
+import AdminsPage from './modules/Admin/pages/AdminsPage';
+import DashboardLayout from './core/layouts/DashboardLayout';
+import { ThemeProvider } from './core/context/ThemeContext';
+import ProtectedRoute from './modules/auth/components/ProtectedRoute';
+import { ROLES } from './modules/auth/utils/roles';
 
 export default function App() {
   return (
